@@ -35,11 +35,16 @@ class CustomDataTypeLink extends CustomDataType
 		if not cdata.url
 			cdata.url = ""
 
-		if @getCustomMaskSettings().editor_style?.value == "inline"
+		if @supportsInline()
 			@__renderEditorInputInline(cdata)
 		else
 			@__renderEditorInputPopover(cdata)
 
+	supportsInline: ->
+		@getCustomMaskSettings().editor_style?.value == "inline"
+
+	supportsTimestamp: ->
+		@getCustomSchemaSettings().add_timestamp?.value
 
 	__renderEditorInputPopover: (cdata) ->
 
@@ -57,12 +62,25 @@ class CustomDataTypeLink extends CustomDataType
 
 	__renderEditorInputInline: (cdata) ->
 
+		fields = @__getEditorFields()
+
+		btn = @__renderButtonByData(cdata)
+		preview = new DataFieldProxy(
+			form:
+				label: $$("custom.data.type.link.preview.label")
+			element: btn
+		)
+
+		fields.push(preview)
+
 		cdata_form = new Form
 			data: cdata
 			onDataChanged: =>
+				preview.replace(@__renderButtonByData(cdata))
 				@__setEditorFieldStatus(cdata, cdata_form.getFieldsByName("url")[0])
-			fields: @__getEditorFields()
+			fields: fields
 		.start()
+
 
 		cdata_form
 
@@ -71,6 +89,7 @@ class CustomDataTypeLink extends CustomDataType
 		@__layout.replace(btn, "left")
 
 	__setEditorFieldStatus: (cdata, element) ->
+		# console.debug "setEditorFieldStatus", cdata, @getDataStatus(cdata), element
 		switch @getDataStatus(cdata)
 			when "invalid"
 				element.addClass("cui-input-invalid")
@@ -89,7 +108,7 @@ class CustomDataTypeLink extends CustomDataType
 			data: cdata
 			onDataChanged: =>
 				@__updateDisplayLink(cdata)
-				@__setEditorFieldStatus(cdata, @__layout)
+				@__setEditorFieldStatus(cdata, cdata_form.getFieldsByName("url")[0])
 			fields: @__getEditorFields()
 		.start()
 
@@ -116,7 +135,7 @@ class CustomDataTypeLink extends CustomDataType
 				label: $$("custom.data.type.link.modal.form.text.label")
 			control: ez5.loca.getLanguageControl()
 		,
-			if @getCustomSchemaSettings().add_timestamp?.value
+			if @supportsTimestamp()
 				name: "datetime"
 				type: DateTime
 				undo_and_changed_support: false
@@ -140,7 +159,7 @@ class CustomDataTypeLink extends CustomDataType
 			else
 				if isEmpty(ez5.loca.getBestFrontendValue(cdata.text)?.trim()) and
 					isEmpty(cdata.url.trim()) and
-					cdata.datetime == null
+					not cdata.datetime
 						return "empty"
 
 			return "invalid"
@@ -158,7 +177,6 @@ class CustomDataTypeLink extends CustomDataType
 
 		goto_url = CUI.parseLocation(cdata.url).url
 
-
 		if cdata.datetime
 			tt_text = $$("custom.data.type.link.url.tooltip_with_datetime", url: goto_url, datetime: ez5.format_date_and_time(cdata.datetime))
 		else
@@ -175,7 +193,7 @@ class CustomDataTypeLink extends CustomDataType
 			tooltip:
 				markdown: true
 				text: tt_text
-			text: ez5.loca.getBestFrontendValue(cdata.text) or url
+			text: ez5.loca.getBestFrontendValue(cdata.text) or goto_url
 		.DOM
 
 	getCheckInfo: (mode) ->
