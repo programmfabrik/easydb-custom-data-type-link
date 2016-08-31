@@ -152,7 +152,7 @@ class CustomDataTypeLink extends CustomDataType
 			if not CUI.isPlainObject(cdata)
 				return "empty"
 
-			if not isEmpty(cdata.url.trim())
+			if not isEmpty(cdata.url?.trim())
 				loc = CUI.parseLocation(cdata.url)
 				if loc and loc.hostname.match(/.+\..{2,}$/)
 					return "ok"
@@ -161,7 +161,7 @@ class CustomDataTypeLink extends CustomDataType
 
 			else
 				if isEmpty(ez5.loca.getBestFrontendValue(cdata.text)?.trim()) and
-					isEmpty(cdata.url.trim()) and
+					isEmpty(cdata.url?.trim()) and
 					not cdata.datetime
 						return "empty"
 
