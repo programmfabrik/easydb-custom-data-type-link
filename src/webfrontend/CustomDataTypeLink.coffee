@@ -149,6 +149,9 @@ class CustomDataTypeLink extends CustomDataType
 	# returns "empty", "ok", "invalid"
 	getDataStatus: (cdata) ->
 		status = do ->
+			if not CUI.isPlainObject(cdata)
+				return "empty"
+
 			if not isEmpty(cdata.url.trim())
 				loc = CUI.parseLocation(cdata.url)
 				if loc and loc.hostname.match(/.+\..{2,}$/)
