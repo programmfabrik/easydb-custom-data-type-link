@@ -108,7 +108,7 @@ class CustomDataTypeLink extends CustomDataType
 			data: cdata
 			onDataChanged: =>
 				@__updateDisplayLink(cdata)
-				@__setEditorFieldStatus(cdata, cdata_form.getFieldsByName("url")[0])
+				@__setEditorFieldStatus(cdata, btn)
 			fields: @__getEditorFields()
 		.start()
 
@@ -201,7 +201,7 @@ class CustomDataTypeLink extends CustomDataType
 		info
 
 	getSaveData: (data, save_data, opts) ->
-		console.debug data, save_data, opts
+		# console.debug data, save_data, opts
 
 		if opts.demo_data
 			return {
