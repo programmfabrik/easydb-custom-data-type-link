@@ -9,6 +9,7 @@ As defined in `CustomDataTypeLink.config.yml` this datatype can be configured:
 ## Scheme options
 
 * whether each link has a timestamp
+* whether each link has a title
  
 ## Mask options
  

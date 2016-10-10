@@ -21,6 +21,10 @@ custom_types:
           parameters:
             value:
               type: bool
+        - name: add_title
+          parameters:
+            value:
+              type: bool
       mask:
         - name: editor_style
           parameters:

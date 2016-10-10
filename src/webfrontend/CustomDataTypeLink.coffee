@@ -46,6 +46,9 @@ class CustomDataTypeLink extends CustomDataType
 	supportsTimestamp: ->
 		@getCustomSchemaSettings().add_timestamp?.value
 
+	supportsTitle: ->
+		@getCustomSchemaSettings().add_title?.value
+
 	__renderEditorInputPopover: (cdata) ->
 
 		@__layout = new HorizontalLayout
@@ -128,12 +131,13 @@ class CustomDataTypeLink extends CustomDataType
 			placeholder: $$("custom.data.type.link.modal.form.url.placeholder")
 			name: "url"
 		,
-			name: "text"
-			type: MultiInput
-			undo_and_changed_support: false
-			form:
-				label: $$("custom.data.type.link.modal.form.text.label")
-			control: ez5.loca.getLanguageControl()
+			if @supportsTitle()
+				name: "text"
+				type: MultiInput
+				undo_and_changed_support: false
+				form:
+					label: $$("custom.data.type.link.modal.form.text.label")
+				control: ez5.loca.getLanguageControl()
 		,
 			if @supportsTimestamp()
 				name: "datetime"
@@ -228,3 +232,6 @@ class CustomDataTypeLink extends CustomDataType
 					datetime: cdata.datetime
 
 CustomDataType.register(CustomDataTypeLink)
+
+# use tabs. may change to spaces
+# vim: tabstop=2 softtabstop=2 shiftwidth=2 noexpandtab
