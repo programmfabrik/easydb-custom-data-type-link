@@ -20,6 +20,4 @@ The source code of this plugin is managed in a git repository at <https://github
 
 ## Requirements
 
-Requires [coffeescript-ui](https://github.com/programmfabrik/coffeescript-ui)
-with minimum version, as included as git submodule in this repository.
-
+You need a "easydb-l10n2json.py" in your path and "../base-plugins.make".
