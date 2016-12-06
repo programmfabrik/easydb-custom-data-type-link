@@ -1,3 +1,10 @@
+###
+ * easydb-custom-data-type-link
+ * Copyright (c) 2013 - 2016 Programmfabrik GmbH
+ * MIT Licence
+ * https://github.com/programmfabrik/coffeescript-ui, http://www.coffeescript-ui.org
+###
+
 describe 'CustomDataTypeLink', () ->
 
   # create a new instance
