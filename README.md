@@ -9,9 +9,9 @@ As defined in `CustomDataTypeLink.config.yml` this datatype can be configured:
 ## Scheme options
 
 * whether each link has a timestamp
- 
+
 ## Mask options
- 
+
 * editor style "inline" or "popover"
 
 ## Sources
