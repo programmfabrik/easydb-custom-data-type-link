@@ -55,16 +55,16 @@ class CustomDataTypeLink extends CustomDataType
 
 	__renderEditorInputPopover: (cdata) ->
 
-		@__layout = new HorizontalLayout
+		layout = new HorizontalLayout
 			left: {}
 			right:
 				content:
 					loca_key: "custom.data.type.link.edit.button"
 					onClick: (ev, btn) =>
-						@showEditPopover(btn, cdata)
+						@showEditPopover(cdata, btn, layout)
 
-		@__updateDisplayLink(cdata)
-		@__layout
+		@__updateDisplayLink(cdata, layout)
+		layout
 
 
 	__renderEditorInputInline: (cdata) ->
@@ -91,9 +91,9 @@ class CustomDataTypeLink extends CustomDataType
 
 		cdata_form
 
-	__updateDisplayLink: (cdata) ->
+	__updateDisplayLink: (cdata, layout) ->
 		btn = @__renderButtonByData(cdata)
-		@__layout.replace(btn, "left")
+		layout.replace(btn, "left")
 
 	__setEditorFieldStatus: (cdata, element) ->
 		# console.debug "setEditorFieldStatus", cdata, @getDataStatus(cdata), element
@@ -109,18 +109,22 @@ class CustomDataTypeLink extends CustomDataType
 
 		@
 
-	showEditPopover: (btn, cdata) ->
+	showEditPopover: (cdata, element, layout) ->
 
 		cdata_form = new Form
 			data: cdata
 			onDataChanged: =>
-				@__updateDisplayLink(cdata)
-				@__setEditorFieldStatus(cdata, btn)
+				@__setEditorFieldStatus(cdata, layout)
 			fields: @__getEditorFields()
 		.start()
 
 		new Popover
-			element: btn
+			element: element
+			onHide: =>
+				@__updateDisplayLink(cdata, layout)
+				Events.trigger
+					node: layout
+					type: "editor-changed"
 			pane:
 				header_left: new LocaLabel(loca_key: "custom.data.type.link.edit.modal.title")
 				content: cdata_form
