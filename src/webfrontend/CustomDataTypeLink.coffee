@@ -25,11 +25,11 @@ class CustomDataTypeLink extends CustomDataType
 		else
 			super(mode)
 
-	renderCustomDataOptionsInDatamodel: (custom_settings) ->
+	getCustomDataOptionsInDatamodelInfo: (custom_settings) ->
 		if custom_settings.add_timestamp?.value
-			new Label(text: $$("custom.data.type.link.setting.schema.rendered_options.with_date"))
+			[ $$("custom.data.type.link.setting.schema.rendered_options.with_date") ]
 		else
-			new Label(text: $$("custom.data.type.link.setting.schema.rendered_options.without_date"))
+			[ $$("custom.data.type.link.setting.schema.rendered_options.without_date") ]
 
 	renderEditorInput: (data, top_level_data, opts) ->
 		# console.error @, data, top_level_data, opts, @name(), @fullName()
