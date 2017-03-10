@@ -16,6 +16,7 @@
 "custom.data.type.link.modal.form.datetime.label","Datum"
 "custom.data.type.link.url.tooltip","**%(url)s** in separatem Fenster öffnen."
 "custom.data.type.link.url.tooltip_with_datetime","**%(url)s** in separatem Fenster öffnen.\n\nZitiert am: %(datetime)s."
-"custom.data.type.link.setting.schema.add_timestamp","Mit Datumsangabe"
+"custom.data.type.link.config.parameter.schema.add_timestamp.value.label","-"
+"custom.data.type.link.config.parameter.schema.add_timestamp.value.checkbox","Mit Datumsangabe"
 "custom.data.type.link.setting.schema.rendered_options.with_date","Mit Datumsangabe"
 "custom.data.type.link.setting.schema.rendered_options.without_date","Ohne Datumsangabe"
