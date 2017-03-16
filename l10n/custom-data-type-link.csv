@@ -9,7 +9,7 @@
 "custom.data.type.link.modal.form.url.placeholder","Web-Link"
 "custom.data.type.link.modal.form.text.label","Text"
 "custom.data.type.link.preview.label","Vorschau"
-"custom.data.type.link.setting.mask.editor_style","Editor-Stil"
+"custom.data.type.link.config.parameter.mask.editor_style.value.label","Editor-Stil"
 "custom.data.type.link.config.option.mask.editor_style.value.inline","Eingebettet"
 "custom.data.type.link.config.option.mask.editor_style.value.popover","Popover"
 "custom.data.type.link.modal.form.text.placeholder","Angezeigter Text"
