@@ -154,6 +154,11 @@ custom_types:
                     analyzer: ez_text_token_analyzer
     config:
       schema:
+        - name: title
+          parameters:
+            type:
+              type: select
+              options: ["none", "text", "text-l10n"]
         - name: add_timestamp
           parameters:
             value:

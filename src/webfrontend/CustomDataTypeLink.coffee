@@ -26,13 +26,20 @@ class CustomDataTypeLink extends CustomDataType
 			super(mode)
 
 	getCustomDataOptionsInDatamodelInfo: (custom_settings) ->
-		if custom_settings.add_timestamp?.value
-			[ $$("custom.data.type.link.setting.schema.rendered_options.with_date") ]
-		else
-			[ $$("custom.data.type.link.setting.schema.rendered_options.without_date") ]
+		tags = []
+		pre = "custom.data.type.link.setting.schema.rendered_options."
+		if custom_settings.title?.type
+			tags.push(pre+"title."+custom_settings.title.type)
 
-	renderEditorInput: (data, top_level_data, opts) ->
-		# console.error @, data, top_level_data, opts, @name(), @fullName()
+		if custom_settings.add_timestamp?.value
+			tags.push(pre+"with_date")
+		else
+			tags.push(pre+"without_date")
+
+		($$(tag) for tag in tags)
+
+
+	initData: (data) ->
 		if not data[@name()]
 			cdata = {}
 			data[@name()] = cdata
@@ -41,6 +48,14 @@ class CustomDataTypeLink extends CustomDataType
 
 		if not cdata.url
 			cdata.url = ""
+
+		cdata
+
+
+	renderEditorInput: (data, top_level_data, opts) ->
+
+		# console.error @, data, top_level_data, opts, @name(), @fullName()
+		cdata = @initData(data)
 
 		if @supportsInline()
 			@__renderEditorInputInline(cdata)
@@ -52,6 +67,9 @@ class CustomDataTypeLink extends CustomDataType
 
 	supportsTimestamp: ->
 		@getCustomSchemaSettings().add_timestamp?.value
+
+	getTitleType: ->
+		@getCustomSchemaSettings().title?.type or "text-l10n"
 
 	__renderEditorInputPopover: (cdata) ->
 
@@ -131,35 +149,49 @@ class CustomDataTypeLink extends CustomDataType
 		.show()
 
 	__getEditorFields: ->
-		[
+		fields = [
 			type: Input
 			undo_and_changed_support: false
 			form:
 				label: $$("custom.data.type.link.modal.form.url.label")
 			placeholder: $$("custom.data.type.link.modal.form.url.placeholder")
 			name: "url"
-		,
-			name: "text"
-			type: MultiInput
-			undo_and_changed_support: false
-			form:
-				label: $$("custom.data.type.link.modal.form.text.label")
-			control: ez5.loca.getLanguageControl()
-		,
-			if @supportsTimestamp()
-				name: "datetime"
+		]
+
+		switch @getTitleType()
+			when "text-l10n"
+				fields.push
+					type: MultiInput
+					name: "text"
+					undo_and_changed_support: false
+					form:
+						label: $$("custom.data.type.link.modal.form.text.label")
+					control: ez5.loca.getLanguageControl()
+			when "text"
+				fields.push
+					type: Input
+					name: "text"
+					undo_and_changed_support: false
+					form:
+						label: $$("custom.data.type.link.modal.form.text.label")
+
+		if @supportsTimestamp()
+			fields.push
 				type: DateTime
+				name: "datetime"
 				undo_and_changed_support: false
 				form:
 					label: $$("custom.data.type.link.modal.form.datetime.label")
-		]
+
+		fields
 
 	renderDetailOutput: (data, top_level_data, opts) ->
-		@__renderButtonByData(data[@name()])
+		cdata = @initData(data)
+		@__renderButtonByData(cdata)
 
 	# returns "empty", "ok", "invalid"
 	getDataStatus: (cdata) ->
-		status = do ->
+		status = do =>
 			if not CUI.isPlainObject(cdata)
 				return "empty"
 
@@ -171,7 +203,7 @@ class CustomDataTypeLink extends CustomDataType
 					return "invalid"
 
 			else
-				if isEmpty(ez5.loca.getBestFrontendValue(cdata.text)?.trim()) and
+				if not @getLinkText(cdata) and
 					isEmpty(cdata.url?.trim()) and
 					not cdata.datetime
 						return "empty"
@@ -207,8 +239,22 @@ class CustomDataTypeLink extends CustomDataType
 			tooltip:
 				markdown: true
 				text: tt_text
-			text: ez5.loca.getBestFrontendValue(cdata.text) or goto_url
+			text: @getLinkText(cdata) or goto_url
 		.DOM
+
+	getLinkText: (cdata) ->
+		switch @getTitleType()
+			when "none"
+				txt = ""
+			when "text"
+				txt = cdata.text_plain
+			when "text-l10n"
+				txt = ez5.loca.getBestFrontendValue(cdata.text)
+
+		if not isEmpty(txt)
+			txt.trim()
+		else
+			txt
 
 	getCheckInfo: (mode) ->
 		info = [ $$("custom.data.type.link.valid_url") ]
@@ -233,9 +279,16 @@ class CustomDataTypeLink extends CustomDataType
 			when "empty"
 				save_data[@name()] = null
 			when "ok"
+				switch @getTitleType()
+					when "text-l10n"
+						text = cdata.text
+					when "text"
+						text_plain = cdata.text_plain
+
 				save_data[@name()] =
 					url: cdata.url.trim()
-					text: cdata.text
+					text: text
+					text_plain: text_plain
 					datetime: cdata.datetime
 
 CustomDataType.register(CustomDataTypeLink)
