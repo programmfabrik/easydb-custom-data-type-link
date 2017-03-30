@@ -10,6 +10,16 @@ class CustomDataTypeLink extends CustomDataType
 		# "custom:solution.custom-types-test.types.link"
 		"custom:base.custom-data-type-link.link"
 
+	getQueryFieldBadge: (data) =>
+		# CUI.error "getQueryFieldBadge", data
+		if data["#{@name()}:unset"]
+			value = $$("text.column.badge.without")
+		else
+			value = data[@name()]
+
+		name: @nameLocalized()
+		value: value
+
 	getCustomDataTypeNameLocalized: ->
 		$$("custom.data.type.link.name")
 
@@ -18,12 +28,6 @@ class CustomDataTypeLink extends CustomDataType
 			false
 		else
 			true
-
-	isVisible: (mode) ->
-		if mode == "expert"
-			false
-		else
-			super(mode)
 
 	getCustomDataOptionsInDatamodelInfo: (custom_settings) ->
 		tags = []
@@ -51,6 +55,27 @@ class CustomDataTypeLink extends CustomDataType
 
 		cdata
 
+	supportsFacet: ->
+		false # true
+
+	getFacet: (opts) ->
+		opts.field = @
+		new CustomDataTypeLinkFacet(opts)
+
+	renderSearchInput: (data, opts={}) ->
+		console.warn "CustomDataTypeLink.renderSearchInput", data, opts
+		search_token = new SearchToken
+			column: @
+			data: data
+			fields: opts.fields
+		.getInput().DOM
+
+	getFieldNamesForSuggest: ->
+		[
+			@fullName()+".tld"
+			@fullName()+".text_plain"
+			@fullName()+".text"
+		]
 
 	renderEditorInput: (data, top_level_data, opts) ->
 
@@ -127,6 +152,31 @@ class CustomDataTypeLink extends CustomDataType
 
 		@
 
+	getSearchFilter: (data, key=@name(), fields) ->
+		# console.debug "getSearchFilter for ", getObjectClass(@), @fullName(), data, key, fields
+		filter = super(data, key)
+		if filter
+			return filter
+
+		if not isEmpty(data[key])
+			@_getSearchFilter(data, key)
+
+	# use to get the filter if the value is notEmpty
+	_getSearchFilter: (data, key) ->
+		val = data[key]
+		[str, phrase] = Search.getPhrase(val)
+
+		filter =
+			type: "match"
+			mode: data[key+":mode"]
+			fields: @getFieldNamesForSuggest()
+			string: str
+			phrase: phrase
+
+		console.debug "str:", str, "phrase:", phrase, filter
+		filter
+
+
 	showEditPopover: (cdata, element, layout) ->
 
 		cdata_form = new Form
@@ -170,7 +220,7 @@ class CustomDataTypeLink extends CustomDataType
 			when "text"
 				fields.push
 					type: Input
-					name: "text"
+					name: "text_plain"
 					undo_and_changed_support: false
 					form:
 						label: $$("custom.data.type.link.modal.form.text.label")
@@ -243,6 +293,7 @@ class CustomDataTypeLink extends CustomDataType
 		.DOM
 
 	getLinkText: (cdata) ->
+		console.debug "getLinkText", cdata, @getTitleType(), @getCustomSchemaSettings()
 		switch @getTitleType()
 			when "none"
 				txt = ""
@@ -285,8 +336,16 @@ class CustomDataTypeLink extends CustomDataType
 					when "text"
 						text_plain = cdata.text_plain
 
+				url = cdata.url.trim()
+
+				loc = CUI.parseLocation(url)
+
+				parts = loc.hostname.split(".")
+
 				save_data[@name()] =
-					url: cdata.url.trim()
+					url: url
+					hostname: loc.hostname
+					tld: parts[parts.length - 1]
 					text: text
 					text_plain: text_plain
 					datetime: cdata.datetime

@@ -11,7 +11,8 @@ INSTALL_FILES = \
 	CustomDataTypeLink.config.yml
 
 L10N_FILES = l10n/$(PLUGIN_NAME).csv
-COFFEE_FILES = src/webfrontend/CustomDataTypeLink.coffee
+COFFEE_FILES = src/webfrontend/CustomDataTypeLink.coffee \
+	src/webfrontend/CustomDataTypeLinkFacet.coffee
 
 all: build
 
