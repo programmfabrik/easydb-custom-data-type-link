@@ -1,29 +1,30 @@
-"key","de-DE","en-US","it-IT","es-ES"
-"custom.data.type.link.name","Web-Link"
-"custom.data.type.link.valid_url","Es muss eine gültige URL eingegeben werden."
-"custom.data.type.link.edit.button|icon","edit"
-"custom.data.type.link.edit.no_link","Kein Web-Link vorhanden."
-"custom.data.type.link.edit.no_valid_link","Web-Link ungültig."
-"custom.data.type.link.edit.modal.title|text","Web-Link konfigurieren"
-"custom.data.type.link.modal.form.url.label","Link"
-"custom.data.type.link.modal.form.url.placeholder","Web-Link"
-"custom.data.type.link.modal.form.text.label","Text"
-"custom.data.type.link.preview.label","Vorschau"
-"custom.data.type.link.config.parameter.mask.editor_style.value.label","Editor-Stil"
-"custom.data.type.link.config.option.mask.editor_style.value.inline","Eingebettet"
-"custom.data.type.link.config.option.mask.editor_style.value.popover","Popover"
-"custom.data.type.link.modal.form.text.placeholder","Angezeigter Text"
-"custom.data.type.link.modal.form.datetime.label","Datum"
-"custom.data.type.link.url.tooltip","**%(url)s** in separatem Fenster öffnen."
-"custom.data.type.link.url.tooltip_with_datetime","**%(url)s** in separatem Fenster öffnen.\n\nZitiert am: %(datetime)s."
-"custom.data.type.link.config.parameter.schema.add_timestamp.value.label","-"
-"custom.data.type.link.config.parameter.schema.add_timestamp.value.checkbox","Mit Datumsangabe"
-"custom.data.type.link.setting.schema.rendered_options.with_date","Mit Datumsangabe"
-"custom.data.type.link.setting.schema.rendered_options.without_date","Ohne Datumsangabe"
-"custom.data.type.link.config.parameter.schema.title.type.label","Titel","Title"
-"custom.data.type.link.config.option.schema.title.type.none","Ohne"
-"custom.data.type.link.config.option.schema.title.type.text","Einsprachig"
-"custom.data.type.link.config.option.schema.title.type.text-l10n","Mehrsprachig"
-"custom.data.type.link.setting.schema.rendered_options.title.none","Ohne Titel"
-"custom.data.type.link.setting.schema.rendered_options.title.text","Einsprachiger Titel"
-"custom.data.type.link.setting.schema.rendered_options.title.text-l10n","Mehrsprachiger Titel"
+key,de-DE,en-US,it-IT,es-ES
+custom.data.type.link.name,Weblink,Weblink,,
+custom.data.type.link.valid_url,Es muss eine gültige URL eingegeben werden.,A valid URL is required.,,
+custom.data.type.link.edit.button|icon,edit,edit,,
+custom.data.type.link.edit.no_link,Kein Weblink vorhanden.,No weblink available.,,
+custom.data.type.link.edit.no_valid_link,Weblink ungültig.,Weblink is invalid.,,
+custom.data.type.link.edit.modal.title|text,Weblink konfigurieren,Edit weblink.,,
+custom.data.type.link.modal.form.url.label,Link,Link,,
+custom.data.type.link.modal.form.url.placeholder,Weblink,Wbelink,,
+custom.data.type.link.modal.form.text.label,Text,Text,,
+custom.data.type.link.preview.label,Vorschau,Preview,,
+custom.data.type.link.config.parameter.mask.editor_style.value.label,Editor-Stil,Editor-Style,,
+custom.data.type.link.config.option.mask.editor_style.value.inline,Eingebettet,Embeded,,
+custom.data.type.link.config.option.mask.editor_style.value.popover,Popover,Popover,,
+custom.data.type.link.modal.form.text.placeholder,Angezeigter Text,Displayed Text,,
+custom.data.type.link.modal.form.datetime.label,Datum,Date,,
+custom.data.type.link.url.tooltip,**%(url)s** in separatem Fenster öffnen.,Open **%(url)s** in new window.,,
+custom.data.type.link.url.tooltip_with_datetime,**%(url)s** in separatem Fenster öffnen.\n\nZitiert am: %(datetime)s.,Open **%(url)s** in new window.\n\nQuote date: %(datetime)s.,,
+custom.data.type.link.config.parameter.schema.add_timestamp.value.label,-,-,,
+custom.data.type.link.config.parameter.schema.add_timestamp.value.checkbox,Mit Datumsangabe,With date,,
+custom.data.type.link.setting.schema.rendered_options.with_date,Mit Datumsangabe,With date,,
+custom.data.type.link.setting.schema.rendered_options.without_date,Ohne Datumsangabe,Without date,,
+custom.data.type.link.config.parameter.schema.title.type.label,Titel,Title,,
+custom.data.type.link.config.option.schema.title.type.none,Ohne,None,,
+custom.data.type.link.config.option.schema.title.type.text,Einsprachig,Monolingual,,
+custom.data.type.link.config.option.schema.title.type.text-l10n,Mehrsprachig,Multilingual,,
+custom.data.type.link.setting.schema.rendered_options.title.none,Ohne Titel,Without title,,
+custom.data.type.link.setting.schema.rendered_options.title.text,Einsprachiger Titel,Monolingual title,,
+custom.data.type.link.setting.schema.rendered_options.title.text-l10n,Mehrsprachiger Titel,Multilingual title,,
+custom.data.type.link.edit.button|tooltip,Weblink hinzufügen.,Add weblink.,,

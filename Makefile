@@ -1,5 +1,10 @@
 # maybe some stuff can be shared, but for now use separate build
 # system for "base" and "extension" style plugin
+
+L10N_FILES = l10n/$(PLUGIN_NAME).csv
+L10N_GOOGLE_KEY = 1Z3UPJ6XqLBp-P8SUf-ewq4osNJ3iZWKJB83tc6Wrfn0
+L10N_GOOGLE_GID = 480475519
+
 PLUGIN_NAME = custom-data-type-link
 INSTALL_FILES = \
 	$(WEB)/l10n/cultures.json \
@@ -10,7 +15,7 @@ INSTALL_FILES = \
 	$(JS) \
 	CustomDataTypeLink.config.yml
 
-L10N_FILES = l10n/$(PLUGIN_NAME).csv
+
 COFFEE_FILES = src/webfrontend/CustomDataTypeLink.coffee \
 	src/webfrontend/CustomDataTypeLinkFacet.coffee
 
