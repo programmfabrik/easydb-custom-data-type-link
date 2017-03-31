@@ -321,7 +321,7 @@ class CustomDataTypeLink extends CustomDataType
 		.DOM
 
 	getLinkText: (cdata) ->
-		console.debug "getLinkText", cdata, @getTitleType(), @getCustomSchemaSettings()
+		# console.debug "getLinkText", cdata, @getTitleType(), @getCustomSchemaSettings()
 		switch @getTitleType()
 			when "none"
 				txt = ""
