@@ -56,7 +56,7 @@ class CustomDataTypeLink extends CustomDataType
 		cdata
 
 	supportsFacet: ->
-		false # true
+		true
 
 	getFacet: (opts) ->
 		opts.field = @
@@ -70,12 +70,24 @@ class CustomDataTypeLink extends CustomDataType
 			fields: opts.fields
 		.getInput().DOM
 
+	getFieldNamesForSearch: ->
+		@getFieldNames()
+
 	getFieldNamesForSuggest: ->
-		[
+		@getFieldNames()
+
+	getFieldNames: ->
+
+		field_names = [
 			@fullName()+".tld"
+			@fullName()+".url"
 			@fullName()+".text_plain"
-			@fullName()+".text"
 		]
+
+		for lang in ez5.session.getPref("search_languages")
+			field_names.push(@fullName()+".text."+lang)
+
+		field_names
 
 	renderEditorInput: (data, top_level_data, opts) ->
 
@@ -153,28 +165,44 @@ class CustomDataTypeLink extends CustomDataType
 		@
 
 	getSearchFilter: (data, key=@name(), fields) ->
-		# console.debug "getSearchFilter for ", getObjectClass(@), @fullName(), data, key, fields
+
+		if data[key+":unset"]
+			filter =
+				type: "in"
+				fields: [ @fullName()+".url" ]
+				in: [ null ]
+			filter._unnest = true
+			filter._unset_filter = true
+			return filter
+
 		filter = super(data, key)
 		if filter
 			return filter
 
-		if not isEmpty(data[key])
-			@_getSearchFilter(data, key)
+		if isEmpty(data[key])
+			return
 
-	# use to get the filter if the value is notEmpty
-	_getSearchFilter: (data, key) ->
 		val = data[key]
 		[str, phrase] = Search.getPhrase(val)
 
-		filter =
-			type: "match"
-			mode: data[key+":mode"]
-			fields: @getFieldNamesForSuggest()
-			string: str
-			phrase: phrase
+		switch data[key+":type"]
+			when "token", "fulltext"
+				filter =
+					type: "match"
+					# mode can be fulltext, token or wildcard
+					mode: data[key+":mode"]
+					fields: @getFieldNamesForSearch()
+					string: str
+					phrase: phrase
 
-		console.debug "str:", str, "phrase:", phrase, filter
+			when "field"
+				filter =
+					type: "in"
+					fields: @getFieldNamesForSearch()
+					in: [ str ]
+
 		filter
+
 
 
 	showEditPopover: (cdata, element, layout) ->

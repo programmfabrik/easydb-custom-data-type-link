@@ -13,6 +13,35 @@ custom_types:
       mapping:
         type: object
         properties:
+          url:
+            type: string
+            index: no
+            fields:
+              exact:
+                type: string
+                term_vector: with_positions_offsets
+                analyzer: ez_exact_analyzer
+              folded:
+                type: string
+                term_vector: with_positions_offsets
+                index_analyzer: ez_text_folded_analyzer
+              fulltext:
+                type: string
+                term_vector: with_positions_offsets
+                index_analyzer: ez_text_fulltext_index_analyzer
+                search_analyzer: ez_text_fulltext_search_analyzer
+              sort:
+                type: string
+                term_vector: with_positions_offsets
+                index_analyzer: sort_de-DE
+              suggest:
+                type: string
+                term_vector: with_positions_offsets
+                index_analyzer: ez_text_fulltext_index_analyzer
+              token:
+                type: string
+                term_vector: with_positions_offsets
+                analyzer: ez_text_token_analyzer
           text_plain:
             type: string
             index: no
