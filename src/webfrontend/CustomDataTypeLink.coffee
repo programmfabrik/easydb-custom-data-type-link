@@ -10,6 +10,7 @@ class CustomDataTypeLink extends CustomDataType
 		# "custom:solution.custom-types-test.types.link"
 		"custom:base.custom-data-type-link.link"
 
+	# returns a map for search tokens, containing name and value strings.
 	getQueryFieldBadge: (data) =>
 		# CUI.error "getQueryFieldBadge", data
 		if data["#{@name()}:unset"]
@@ -62,6 +63,7 @@ class CustomDataTypeLink extends CustomDataType
 		opts.field = @
 		new CustomDataTypeLinkFacet(opts)
 
+	# returns markup to display in expert search
 	renderSearchInput: (data, opts={}) ->
 		console.warn "CustomDataTypeLink.renderSearchInput", data, opts
 		search_token = new SearchToken
@@ -164,7 +166,11 @@ class CustomDataTypeLink extends CustomDataType
 
 		@
 
-	getSearchFilter: (data, key=@name(), fields) ->
+	# returns a search filter suitable to the search array part
+	# of the request, the data to be search is in data[key] plus
+	# possible additions, which should be stored in key+":<additional>"
+
+	getSearchFilter: (data, key=@name()) ->
 
 		if data[key+":unset"]
 			filter =
@@ -186,7 +192,7 @@ class CustomDataTypeLink extends CustomDataType
 		[str, phrase] = Search.getPhrase(val)
 
 		switch data[key+":type"]
-			when "token", "fulltext"
+			when "token", "fulltext", undefined
 				filter =
 					type: "match"
 					# mode can be fulltext, token or wildcard
@@ -200,6 +206,8 @@ class CustomDataTypeLink extends CustomDataType
 					type: "in"
 					fields: @getFieldNamesForSearch()
 					in: [ str ]
+
+		# console.error "search filter", data, key, data[key+":type"], filter
 
 		filter
 
