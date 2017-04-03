@@ -265,4 +265,4 @@ custom_types:
           parameters:
             value:
               type: select
-              options: ["inline", "popover"]
+              options: ["inline",  "popover"]

@@ -1,11 +1,10 @@
-# maybe some stuff can be shared, but for now use separate build
-# system for "base" and "extension" style plugin
+PLUGIN_NAME = custom-data-type-link
 
 L10N_FILES = l10n/$(PLUGIN_NAME).csv
 L10N_GOOGLE_KEY = 1Z3UPJ6XqLBp-P8SUf-ewq4osNJ3iZWKJB83tc6Wrfn0
 L10N_GOOGLE_GID = 480475519
+L10N2JSON = python easydb-library/tools/l10n2json.py
 
-PLUGIN_NAME = custom-data-type-link
 INSTALL_FILES = \
 	$(WEB)/l10n/cultures.json \
 	$(WEB)/l10n/de-DE.json \
@@ -15,16 +14,17 @@ INSTALL_FILES = \
 	$(JS) \
 	CustomDataTypeLink.config.yml
 
-
 COFFEE_FILES = src/webfrontend/CustomDataTypeLink.coffee \
 	src/webfrontend/CustomDataTypeLinkFacet.coffee
 
 all: build
 
-include ../base-plugins.make
+include easydb-library/tools/base-plugins.make
 
 build: code $(L10N)
 
 code: $(JS)
 
 clean: clean-base
+
+wipe: wipe-base
