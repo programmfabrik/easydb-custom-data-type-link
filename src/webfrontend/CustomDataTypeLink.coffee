@@ -385,5 +385,10 @@ class CustomDataTypeLink extends CustomDataType
 					text: text
 					text_plain: text_plain
 					datetime: cdata.datetime
+					_fulltext:
+						l10ntext: text
+						text: text_plain
+						string: url
+
 
 CustomDataType.register(CustomDataTypeLink)
