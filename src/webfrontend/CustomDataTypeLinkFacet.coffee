@@ -1,4 +1,4 @@
-class CustomDataTypeLinkFacet extends Facet
+class CustomDataTypeLinkFacet extends FieldFacet
 
 	initOpts: ->
 		super()
@@ -27,9 +27,6 @@ class CustomDataTypeLinkFacet extends Facet
 
 	name: ->
 		@_field.fullName()+".tld"
-
-	nameLocalized: ->
-		@_field.nameLocalized()
 
 	requestSearchFilter: (obj) ->
 
