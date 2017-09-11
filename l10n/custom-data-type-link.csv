@@ -6,7 +6,7 @@ custom.data.type.link.edit.no_link,Kein Weblink vorhanden.,No weblink available.
 custom.data.type.link.edit.no_valid_link,Weblink ungültig.,Weblink is invalid.,,
 custom.data.type.link.edit.modal.title|text,Weblink konfigurieren,Edit weblink.,,
 custom.data.type.link.modal.form.url.label,Link,Link,,
-custom.data.type.link.modal.form.url.placeholder,Weblink,Wbelink,,
+custom.data.type.link.modal.form.url.placeholder,Weblink,Weblink,,
 custom.data.type.link.modal.form.text.label,Text,Text,,
 custom.data.type.link.preview.label,Vorschau,Preview,,
 custom.data.type.link.config.parameter.mask.editor_style.value.label,Editor-Stil,Editor-Style,,
