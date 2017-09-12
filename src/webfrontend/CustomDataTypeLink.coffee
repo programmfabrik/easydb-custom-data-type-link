@@ -33,6 +33,7 @@ class CustomDataTypeLink extends CustomDataType
 	getCustomDataOptionsInDatamodelInfo: (custom_settings) ->
 		tags = []
 		pre = "custom.data.type.link.setting.schema.rendered_options."
+
 		if custom_settings.title?.type
 			tags.push(pre+"title."+custom_settings.title.type)
 
@@ -107,7 +108,7 @@ class CustomDataTypeLink extends CustomDataType
 			@__renderEditorInputPopover(cdata)
 
 	supportsInline: ->
-		@getCustomMaskSettings().editor_style?.value == "inline"
+		@getCustomMaskSettings().editor_style?.value != "popover"
 
 	supportsTimestamp: ->
 		@getCustomSchemaSettings().add_timestamp?.value
