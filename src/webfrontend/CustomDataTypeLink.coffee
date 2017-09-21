@@ -57,6 +57,12 @@ class CustomDataTypeLink extends CustomDataType
 
 		cdata
 
+	renderFieldAsGroup: (data, top_level_data, opts) ->
+		if opts.fieldRenderType == 'editor' and @supportsInline()
+			return true
+		else
+			return false
+
 	supportsFacet: ->
 		true
 
@@ -71,7 +77,7 @@ class CustomDataTypeLink extends CustomDataType
 
 	# returns markup to display in expert search
 	renderSearchInput: (data, opts={}) ->
-		console.warn "CustomDataTypeLink.renderSearchInput", data, opts
+		# console.warn "CustomDataTypeLink.renderSearchInput", data, opts
 		search_token = new SearchToken
 			column: @
 			data: data
@@ -191,7 +197,7 @@ class CustomDataTypeLink extends CustomDataType
 		if filter
 			return filter
 
-		if isEmpty(data[key])
+		if CUI.util.isEmpty(data[key])
 			return
 
 		val = data[key]
@@ -287,7 +293,7 @@ class CustomDataTypeLink extends CustomDataType
 			if not CUI.isPlainObject(cdata)
 				return "empty"
 
-			if not isEmpty(cdata.url?.trim())
+			if not CUI.util.isEmpty(cdata.url?.trim())
 				loc = CUI.parseLocation(cdata.url)
 				if loc and loc.hostname.match(/.+\..{2,}$/)
 					return "ok"
@@ -296,7 +302,7 @@ class CustomDataTypeLink extends CustomDataType
 
 			else
 				if not @getLinkText(cdata) and
-					isEmpty(cdata.url?.trim()) and
+					CUI.util.isEmpty(cdata.url?.trim()) and
 					not cdata.datetime
 						return "empty"
 
@@ -324,7 +330,7 @@ class CustomDataTypeLink extends CustomDataType
 			url: goto_url
 			datetime: ez5.format_date_and_time(cdata.datetime)
 
-		new ButtonHref
+		new CUI.ButtonHref
 			appearance: "link"
 			href: goto_url
 			target: "_blank"
@@ -344,7 +350,7 @@ class CustomDataTypeLink extends CustomDataType
 			when "text-l10n"
 				txt = ez5.loca.getBestFrontendValue(cdata.text)
 
-		if not isEmpty(txt)
+		if not CUI.util.isEmpty(txt)
 			txt.trim()
 		else
 			txt
