@@ -118,7 +118,7 @@ class CustomDataTypeLink extends CustomDataType
 
 	__renderEditorInputPopover: (cdata) ->
 
-		layout = new HorizontalLayout
+		layout = new CUI.HorizontalLayout
 			left: {}
 			right:
 				content:
@@ -143,7 +143,7 @@ class CustomDataTypeLink extends CustomDataType
 
 		fields.push(preview)
 
-		cdata_form = new Form
+		cdata_form = new CUI.Form
 			data: cdata
 			onDataChanged: =>
 				preview.replace(@__renderButtonByData(cdata))
@@ -221,14 +221,14 @@ class CustomDataTypeLink extends CustomDataType
 
 	showEditPopover: (cdata, element, layout) ->
 
-		cdata_form = new Form
+		cdata_form = new CUI.Form
 			data: cdata
 			onDataChanged: =>
 				@__setEditorFieldStatus(cdata, layout)
 			fields: @__getEditorFields()
 		.start()
 
-		new Popover
+		new CUI.Popover
 			element: element
 			onHide: =>
 				@__updateDisplayLink(cdata, layout)
@@ -309,9 +309,9 @@ class CustomDataTypeLink extends CustomDataType
 
 		switch @getDataStatus(cdata)
 			when "empty"
-				return new EmptyLabel(text: $$("custom.data.type.link.edit.no_link")).DOM
+				return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.no_link")).DOM
 			when "invalid"
-				return new EmptyLabel(text: $$("custom.data.type.link.edit.no_valid_link")).DOM
+				return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.no_valid_link")).DOM
 
 		goto_url = CUI.parseLocation(cdata.url).url
 
@@ -324,7 +324,7 @@ class CustomDataTypeLink extends CustomDataType
 			url: goto_url
 			datetime: ez5.format_date_and_time(cdata.datetime)
 
-		new ButtonHref
+		new CUI.ButtonHref
 			appearance: "link"
 			href: goto_url
 			target: "_blank"
