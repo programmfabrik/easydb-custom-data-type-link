@@ -242,7 +242,7 @@ class CustomDataTypeLink extends CustomDataType
 
 	__getEditorFields: ->
 		fields = [
-			type: Input
+			type: CUI.Input
 			undo_and_changed_support: false
 			form:
 				label: $$("custom.data.type.link.modal.form.url.label")
@@ -253,7 +253,7 @@ class CustomDataTypeLink extends CustomDataType
 		switch @getTitleType()
 			when "text-l10n"
 				fields.push
-					type: MultiInput
+					type: CUI.MultiInput
 					name: "text"
 					undo_and_changed_support: false
 					form:
@@ -261,7 +261,7 @@ class CustomDataTypeLink extends CustomDataType
 					control: ez5.loca.getLanguageControl()
 			when "text"
 				fields.push
-					type: Input
+					type: CUI.Input
 					name: "text_plain"
 					undo_and_changed_support: false
 					form:
@@ -269,7 +269,7 @@ class CustomDataTypeLink extends CustomDataType
 
 		if @supportsTimestamp()
 			fields.push
-				type: DateTime
+				type: CUI.DateTime
 				name: "datetime"
 				undo_and_changed_support: false
 				form:
