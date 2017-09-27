@@ -166,7 +166,7 @@ class CustomDataTypeLink extends CustomDataType
 			else
 				element.removeClass("cui-input-invalid")
 
-		Events.trigger
+		CUI.Events.trigger
 			node: element
 			type: "editor-changed"
 
@@ -232,7 +232,7 @@ class CustomDataTypeLink extends CustomDataType
 			element: element
 			onHide: =>
 				@__updateDisplayLink(cdata, layout)
-				Events.trigger
+				CUI.Events.trigger
 					node: layout
 					type: "editor-changed"
 			pane:
