@@ -78,6 +78,8 @@ class CustomDataTypeLink extends CustomDataType
 	# returns markup to display in expert search
 	renderSearchInput: (data, opts={}) ->
 		# console.warn "CustomDataTypeLink.renderSearchInput", data, opts
+		data._search = true
+
 		search_token = new SearchToken
 			column: @
 			data: data
@@ -121,6 +123,12 @@ class CustomDataTypeLink extends CustomDataType
 
 	getTitleType: ->
 		@getCustomSchemaSettings().title?.type or "text-l10n"
+
+	hasUserData: (data) ->
+		if not data._search
+			return super(data)
+
+		return not CUI.util.isEmpty(data[@name()])
 
 	__renderEditorInputPopover: (cdata) ->
 
