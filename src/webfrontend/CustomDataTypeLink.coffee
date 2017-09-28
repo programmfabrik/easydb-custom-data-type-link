@@ -57,6 +57,12 @@ class CustomDataTypeLink extends CustomDataType
 
 		cdata
 
+	renderFieldAsGroup: (data, top_level_data, opts) ->
+		if opts.fieldRenderType == 'editor' and @supportsInline()
+			return true
+		else
+			return false
+
 	supportsFacet: ->
 		true
 
@@ -71,7 +77,7 @@ class CustomDataTypeLink extends CustomDataType
 
 	# returns markup to display in expert search
 	renderSearchInput: (data, opts={}) ->
-		console.warn "CustomDataTypeLink.renderSearchInput", data, opts
+		# console.warn "CustomDataTypeLink.renderSearchInput", data, opts
 		search_token = new SearchToken
 			column: @
 			data: data
