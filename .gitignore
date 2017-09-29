@@ -5,3 +5,4 @@ build
 *.spec.coffee
 
 node_modules/
+.idea
