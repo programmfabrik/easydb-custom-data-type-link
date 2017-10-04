@@ -73,7 +73,7 @@ class CustomDataTypeLink extends CustomDataType
 	# provide a sort function to sort your data
 	getSortFunction: ->
 		(a, b) =>
-			compareIndex(a[@name()]?.hostname or 'zzz', b[@name()]?.hostname or 'zzz')
+			CUI.util.compareIndex(a[@name()]?.hostname or 'zzz', b[@name()]?.hostname or 'zzz')
 
 	# returns markup to display in expert search
 	renderSearchInput: (data, opts={}) ->
