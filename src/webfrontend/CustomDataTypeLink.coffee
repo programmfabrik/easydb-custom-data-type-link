@@ -12,7 +12,7 @@ class CustomDataTypeLink extends CustomDataType
 
 	# returns a map for search tokens, containing name and value strings.
 	getQueryFieldBadge: (data) =>
-		# CUI.error "getQueryFieldBadge", data
+		# console.error "getQueryFieldBadge", data
 		if data["#{@name()}:unset"]
 			value = $$("text.column.badge.without")
 		else
