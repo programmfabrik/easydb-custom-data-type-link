@@ -378,37 +378,41 @@ class CustomDataTypeLink extends CustomDataType
 			when "empty"
 				save_data[@name()] = null
 			when "ok"
-				switch @getTitleType()
-					when "text-l10n"
-						text = cdata.text
-					when "text"
-						text_plain = cdata.text_plain
+				save_data[@name()] = @__buildData(cdata)
 
-				url = cdata.url.trim()
 
-				loc = CUI.parseLocation(url)
+	__buildData: (cdata) ->
+		switch @getTitleType()
+			when "text-l10n"
+				text = cdata.text
+			when "text"
+				text_plain = cdata.text_plain
 
-				parts = loc.hostname.split(".")
+		url = cdata.url.trim()
 
-				save_data[@name()] =
-					url: url
-					hostname: loc.hostname
-					tld: parts[parts.length - 1]
-					text: text
-					text_plain: text_plain
-					datetime: cdata.datetime
-					_fulltext:
-						l10ntext: text
-						text: text_plain
-						string: url
+		loc = CUI.parseLocation(url)
+
+		parts = loc.hostname.split(".")
+
+		return (
+			url: url
+			hostname: loc.hostname
+			tld: parts[parts.length - 1]
+			text: text
+			text_plain: text_plain
+			datetime: cdata.datetime
+			_fulltext:
+				l10ntext: text
+				text: text_plain
+				string: url
+		)
 
 	getCSVDestinationFields: (csvImporter) ->
-
 		opts =
 			csvImporter: csvImporter
 			field: @
 
-		[ new LinkColumnCSVImporterDestinationField(opts) ]
+		[ new CustomDataTypeLinkColumnCSVImporterDestinationField(opts) ]
 
 
 CustomDataType.register(CustomDataTypeLink)
