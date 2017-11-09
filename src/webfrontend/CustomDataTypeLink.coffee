@@ -402,5 +402,13 @@ class CustomDataTypeLink extends CustomDataType
 						text: text_plain
 						string: url
 
+	getCSVDestinationFields: (csvImporter) ->
+
+		opts =
+			csvImporter: csvImporter
+			field: @
+
+		[ new LinkColumnCSVImporterDestinationField(opts) ]
+
 
 CustomDataType.register(CustomDataTypeLink)

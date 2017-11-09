@@ -15,7 +15,8 @@ INSTALL_FILES = \
 	CustomDataTypeLink.config.yml
 
 COFFEE_FILES = src/webfrontend/CustomDataTypeLink.coffee \
-	src/webfrontend/CustomDataTypeLinkFacet.coffee
+	src/webfrontend/CustomDataTypeLinkFacet.coffee \
+	src/webfrontend/LinkColumnCSVImporterDestinationField.coffee
 
 all: build
 
