@@ -24,7 +24,12 @@ class CustomDataTypeLink extends CustomDataType
 	getCustomDataTypeNameLocalized: ->
 		$$("custom.data.type.link.name")
 
-	isEmpty: (data, top_level_data, opts) ->
+	isEmpty: (data, top_level_data, opts={}) ->
+
+		if opts.mode == "expert"
+			# check plain input in search
+			return CUI.util.isEmpty(data[@name()]?.trim())
+
 		if data[@name()]?.url
 			false
 		else
