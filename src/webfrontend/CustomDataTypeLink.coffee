@@ -412,6 +412,12 @@ class CustomDataTypeLink extends CustomDataType
 				string: url
 		)
 
+	sortExtraOpts: ->
+		return [
+			text: $$("custom.data.type.link.modal.form.url.label")
+			value: "url"
+		]
+
 	getCSVDestinationFields: (csvImporter) ->
 		opts =
 			csvImporter: csvImporter
