@@ -412,6 +412,9 @@ class CustomDataTypeLink extends CustomDataType
 				string: url
 		)
 
+	hasRenderForSort: ->
+		return true
+
 	sortExtraOpts: ->
 		return [
 			text: $$("custom.data.type.link.modal.form.url.label")
