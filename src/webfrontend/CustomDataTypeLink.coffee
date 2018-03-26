@@ -154,34 +154,25 @@ class CustomDataTypeLink extends CustomDataType
 
 		fields.push(preview)
 
-		cdata_form = new CUI.Form
+		form = new CUI.Form
 			data: cdata
 			onDataChanged: =>
 				preview.replace(@__renderButtonByData(cdata))
-				@__setEditorFieldStatus(cdata, cdata_form.getFieldsByName("url")[0])
+				@__triggerFormChanged(form)
 			fields: fields
 		.start()
 
 
-		cdata_form
+		form
 
 	__updateDisplayLink: (cdata, layout) ->
 		btn = @__renderButtonByData(cdata)
 		layout.replace(btn, "left")
 
-	__setEditorFieldStatus: (cdata, element) ->
-		# console.debug "setEditorFieldStatus", cdata, @getDataStatus(cdata), element
-		switch @getDataStatus(cdata)
-			when "invalid"
-				element.addClass("cui-input-invalid")
-			else
-				element.removeClass("cui-input-invalid")
-
+	__triggerFormChanged: (form) ->
 		CUI.Events.trigger
-			node: element
+			node: form
 			type: "editor-changed"
-
-		@
 
 	# returns a search filter suitable to the search array part
 	# of the request, the data to be search is in data[key] plus
@@ -232,11 +223,11 @@ class CustomDataTypeLink extends CustomDataType
 
 	showEditPopover: (cdata, element, layout) ->
 
-		cdata_form = new CUI.Form
+		form = new CUI.Form
 			data: cdata
-			onDataChanged: =>
-				@__setEditorFieldStatus(cdata, layout)
 			fields: @__getEditorFields()
+			onDataChanged: =>
+				@__triggerFormChanged(form)
 		.start()
 
 		new CUI.Popover
@@ -248,7 +239,7 @@ class CustomDataTypeLink extends CustomDataType
 					type: "editor-changed"
 			pane:
 				header_left: new LocaLabel(loca_key: "custom.data.type.link.edit.modal.title")
-				content: cdata_form
+				content: form
 		.show()
 
 	__getEditorFields: ->
@@ -259,6 +250,7 @@ class CustomDataTypeLink extends CustomDataType
 				label: $$("custom.data.type.link.modal.form.url.label")
 			placeholder: $$("custom.data.type.link.modal.form.url.placeholder")
 			name: "url"
+			checkInput: (url) => @__isValidUrl(url)
 		]
 
 		switch @getTitleType()
@@ -299,8 +291,7 @@ class CustomDataTypeLink extends CustomDataType
 				return "empty"
 
 			if not CUI.util.isEmpty(cdata.url?.trim())
-				loc = CUI.parseLocation(cdata.url)
-				if loc and loc.hostname.match(/.+\..{2,}$/)
+				if @__isValidUrl(cdata.url)
 					return "ok"
 				else
 					return "invalid"
@@ -315,6 +306,11 @@ class CustomDataTypeLink extends CustomDataType
 
 		# console.debug "checking...", cdata.url, status
 		return status
+
+	__isValidUrl: (url) ->
+		location = CUI.parseLocation(url)
+		return !!location and location.hostname.match(/.+\..{2,}$/)
+
 
 	__renderButtonByData: (cdata) ->
 
@@ -395,14 +391,14 @@ class CustomDataTypeLink extends CustomDataType
 
 		url = cdata.url.trim()
 
-		loc = CUI.parseLocation(url)
+		location = CUI.parseLocation(url)
 
-		parts = loc.hostname.split(".")
+		hostnameParts = location.hostname.split(".")
 
 		return (
 			url: url
-			hostname: loc.hostname
-			tld: parts[parts.length - 1]
+			hostname: location.hostname
+			tld: hostnameParts[hostnameParts.length - 1]
 			text: text
 			text_plain: text_plain
 			datetime: cdata.datetime
