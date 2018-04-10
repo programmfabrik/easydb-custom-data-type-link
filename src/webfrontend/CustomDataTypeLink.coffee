@@ -156,6 +156,7 @@ class CustomDataTypeLink extends CustomDataType
 
 		form = new CUI.Form
 			data: cdata
+			maximize_horizontal: true
 			onDataChanged: =>
 				preview.replace(@__renderButtonByData(cdata))
 				@__triggerFormChanged(form)
