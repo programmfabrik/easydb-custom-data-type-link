@@ -291,17 +291,11 @@ class CustomDataTypeLink extends CustomDataType
 			if not CUI.isPlainObject(cdata)
 				return "empty"
 
-			if not CUI.util.isEmpty(cdata.url?.trim())
-				if @__isValidUrl(cdata.url)
-					return "ok"
-				else
-					return "invalid"
+			if CUI.util.isEmpty(cdata.url?.trim())
+				return "empty"
 
-			else
-				if not @getLinkText(cdata) and
-					CUI.util.isEmpty(cdata.url?.trim()) and
-					not cdata.datetime
-						return "empty"
+			if @__isValidUrl(cdata.url)
+				return "ok"
 
 			return "invalid"
 
@@ -310,16 +304,16 @@ class CustomDataTypeLink extends CustomDataType
 
 	__isValidUrl: (url) ->
 		location = CUI.parseLocation(url)
-		return !!location and location.hostname.match(/.+\..{2,}$/)
+		return !!location and /.+\..{2,}$/.test(location.hostname)
 
 
 	__renderButtonByData: (cdata) ->
 
 		switch @getDataStatus(cdata)
 			when "empty"
-				return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.no_link")).DOM
+				return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.no_link"))
 			when "invalid"
-				return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.no_valid_link")).DOM
+				return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.no_valid_link"), class: "ez-label-invalid")
 
 		goto_url = CUI.parseLocation(cdata.url).url
 
@@ -381,7 +375,6 @@ class CustomDataTypeLink extends CustomDataType
 				save_data[@name()] = null
 			when "ok"
 				save_data[@name()] = @__buildData(cdata)
-
 
 	__buildData: (cdata) ->
 		switch @getTitleType()
