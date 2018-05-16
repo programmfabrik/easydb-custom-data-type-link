@@ -377,13 +377,31 @@ class CustomDataTypeLink extends CustomDataType
 				save_data[@name()] = @__buildData(cdata)
 
 	__buildData: (cdata) ->
+		standard =
+			l10ntext: undefined
+			text: undefined
+
 		switch @getTitleType()
 			when "text-l10n"
 				text = cdata.text
+				for lang, value of text
+					if CUI.util.isEmpty(value.trim())
+						continue
+					if not standard.l10ntext
+						standard.l10ntext = {}
+					standard.l10ntext[lang] = value
+
 			when "text"
 				text_plain = cdata.text_plain
+				if not CUI.util.isEmpty(text_plain.trim())
+					standard.text = text_plain
 
 		url = cdata.url.trim()
+
+		# console.debug "standard", standard, url
+
+		if not standard.text and not standard.l10ntext
+			standard.text = url
 
 		location = CUI.parseLocation(url)
 
@@ -400,6 +418,7 @@ class CustomDataTypeLink extends CustomDataType
 				l10ntext: text
 				text: text_plain
 				string: url
+			_standard: standard
 		)
 
 	hasRenderForSort: ->
