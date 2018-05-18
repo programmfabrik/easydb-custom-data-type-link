@@ -118,6 +118,9 @@ class CustomDataTypeLink extends CustomDataType
 		else
 			@__renderEditorInputPopover(cdata)
 
+	supportsStandard: ->
+		true
+
 	supportsInline: ->
 		@getCustomMaskSettings().editor_style?.value != "popover"
 
