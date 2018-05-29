@@ -373,7 +373,10 @@ class CustomDataTypeLink extends CustomDataType
 
 		switch @getDataStatus(cdata)
 			when "invalid"
-				throw new InvalidSaveDataException()
+				if opts.copy
+					save_data[@name()] = null
+				else
+					throw new InvalidSaveDataException()
 			when "empty"
 				save_data[@name()] = null
 			when "ok"
