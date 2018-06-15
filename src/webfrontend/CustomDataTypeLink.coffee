@@ -358,7 +358,7 @@ class CustomDataTypeLink extends CustomDataType
 		info = [ $$("custom.data.type.link.valid_url") ]
 		info
 
-	getSaveData: (data, save_data, opts) ->
+	getSaveData: (data, save_data, opts = {}) ->
 		# console.debug data, save_data, opts
 
 		if opts.demo_data
