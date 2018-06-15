@@ -399,7 +399,7 @@ class CustomDataTypeLink extends CustomDataType
 
 			when "text"
 				text_plain = cdata.text_plain
-				if not CUI.util.isEmpty(text_plain.trim())
+				if not CUI.util.isEmpty(text_plain?.trim())
 					standard.text = text_plain
 
 		url = cdata.url.trim()
