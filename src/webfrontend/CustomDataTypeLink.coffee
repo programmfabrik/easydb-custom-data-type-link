@@ -358,7 +358,7 @@ class CustomDataTypeLink extends CustomDataType
 		info = [ $$("custom.data.type.link.valid_url") ]
 		info
 
-	getSaveData: (data, save_data, opts = {}) ->
+	getSaveData: (data, save_data, opts) ->
 		# console.debug data, save_data, opts
 
 		if opts.demo_data
@@ -439,9 +439,6 @@ class CustomDataTypeLink extends CustomDataType
 			text: $$("custom.data.type.link.modal.form.url.label")
 			value: "url"
 		]
-
-	supportsStandard: ->
-		true
 
 	getCSVDestinationFields: (csvImporter) ->
 		opts =
