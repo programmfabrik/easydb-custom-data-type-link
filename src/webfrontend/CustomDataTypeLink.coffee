@@ -404,10 +404,14 @@ class CustomDataTypeLink extends CustomDataType
 
 		url = cdata.url.trim()
 
-		# console.debug "standard", standard, url
-
 		if not standard.text and not standard.l10ntext
 			standard.text = url
+		else if standard.l10ntext
+			delete(standard.text)
+		else
+			delete(standard.l10ntext)
+
+		# console.debug "standard", standard, url
 
 		location = CUI.parseLocation(url)
 
