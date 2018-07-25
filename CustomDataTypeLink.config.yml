@@ -14,6 +14,7 @@ plugin:
   webfrontend:
     url: custom-data-type-link.js
     l10n: l10n/
+
 custom_types:
   link:
     mapping:
@@ -42,3 +43,28 @@ custom_types:
             value:
               type: select
               options: ["inline",  "popover"]
+
+base_config:
+  - name: weblink
+    group: weblink
+    parameters:
+      templates:
+        type: table
+        fields:
+          - name: name
+            type: text-l10n
+          - name: url
+            type: text
+            regexp: "^https?://[^/]+?$"
+          - name: displayname
+            type: text-l10n
+          - name: placeholders
+            type: table
+            fields:
+              - name: displayname
+                type: text-l10n
+              - name: key
+                type: text
+          - name: icon_url
+            type: text
+        position: 0

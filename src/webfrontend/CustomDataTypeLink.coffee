@@ -82,12 +82,11 @@ class CustomDataTypeLink extends CustomDataType
 
 	# returns markup to display in expert search
 	renderSearchInput: (data, opts={}) ->
-		# console.warn "CustomDataTypeLink.renderSearchInput", data, opts
-		search_token = new SearchToken
+		return new SearchToken(
 			column: @
 			data: data
 			fields: opts.fields
-		.getInput().DOM
+		).getInput().DOM
 
 	getFieldNamesForSearch: ->
 		@getFieldNames()
@@ -109,8 +108,6 @@ class CustomDataTypeLink extends CustomDataType
 		field_names
 
 	renderEditorInput: (data, top_level_data, opts) ->
-
-		# console.error @, data, top_level_data, opts, @name(), @fullName()
 		cdata = @initData(data)
 
 		if @supportsInline()
@@ -146,14 +143,15 @@ class CustomDataTypeLink extends CustomDataType
 
 	__renderEditorInputInline: (cdata) ->
 
-		fields = @__getEditorFields()
+		fields = @__getEditorFields(cdata)
 
 		btn = @__renderButtonByData(cdata)
-		preview = new DataFieldProxy(
+		preview =
+			name: "preview"
+			type: DataFieldProxy
 			form:
 				label: $$("custom.data.type.link.preview.label")
 			element: btn
-		)
 
 		fields.push(preview)
 
@@ -161,7 +159,8 @@ class CustomDataTypeLink extends CustomDataType
 			data: cdata
 			maximize_horizontal: true
 			onDataChanged: =>
-				preview.replace(@__renderButtonByData(cdata))
+				previewField = form.getFieldsByName("preview")[0]
+				previewField.replace(@__renderButtonByData(cdata))
 				@__triggerFormChanged(form)
 			fields: fields
 		.start()
@@ -218,15 +217,9 @@ class CustomDataTypeLink extends CustomDataType
 					type: "in"
 					fields: @getFieldNamesForSearch()
 					in: [ str ]
-
-		# console.error "search filter", data, key, data[key+":type"], filter
-
 		filter
 
-
-
 	showEditPopover: (cdata, element, layout) ->
-
 		form = new CUI.Form
 			data: cdata
 			fields: @__getEditorFields()
@@ -246,8 +239,16 @@ class CustomDataTypeLink extends CustomDataType
 				content: form
 		.show()
 
-	__getEditorFields: ->
-		fields = [
+	__getEditorFields: (cdata) ->
+		templateSelectField = @__getTemplateSelectFields(cdata)
+
+		fields = []
+
+		if templateSelectField
+			fields.push(templateSelectField[0]) # Template selector
+			fields.push(templateSelectField[1]) # Placeholder inputs
+
+		fields.push
 			type: CUI.Input
 			undo_and_changed_support: false
 			form:
@@ -255,7 +256,6 @@ class CustomDataTypeLink extends CustomDataType
 			placeholder: $$("custom.data.type.link.modal.form.url.placeholder")
 			name: "url"
 			checkInput: (url) => @__isValidUrl(url)
-		]
 
 		switch @getTitleType()
 			when "text-l10n"
@@ -283,6 +283,127 @@ class CustomDataTypeLink extends CustomDataType
 					label: $$("custom.data.type.link.modal.form.datetime.label")
 
 		fields
+
+	__getTemplateSelectFields: (cdata) ->
+		templates = ez5.session.getBaseConfig().system.weblink?.templates
+		if not templates or templates.length == 0
+			return
+
+		templateData = {}
+
+		# If there is an existing URL, try to match with an existing template and substract the placeholders' values.
+		if cdata
+			url = cdata.url
+			for template, index in templates
+				urlRegExpValues = new RegExp(template.url.replace(/%[^%]+%/g, "(.*)"))
+				match = urlRegExpValues.exec(url)
+				if match?.length > 0
+					match.shift() # match[0] is the full url, so it is removed.
+					placeholdersRegexp = /%([^%]+)%/g
+					placeholdersValues = {}
+					for value in match
+						nextPlaceholderMatch = placeholdersRegexp.exec(template.url) # match[0] = %placeholder%, match[1] = placeholder
+						if nextPlaceholderMatch
+							placeholdersValues[nextPlaceholderMatch[1]] = value
+					templateData.template = index
+					break
+
+		getPlaceholdersFields = (template) =>
+			placeholdersFields = []
+			for placeholder in template.placeholders
+				placeholdersFields.push
+					type: CUI.Input
+					name: placeholder.key
+					form: label: ez5.loca.getBestFrontendValue(placeholder.displayname)
+			return placeholdersFields
+
+		fillDisplayName = (data, templateDisplayname) =>
+			switch @getTitleType()
+				when "text-l10n"
+					for language, displayname of templateDisplayname
+						data.text[language] = displayname
+				when "text"
+					data.text_plain = ez5.loca.getBestFrontendValue(templateDisplayname)
+			return
+
+		replacePlaceholder = (string, name, value) =>
+			return string.replace(///%#{name}%///g, value)
+
+		placeholdersFieldForm =
+			type: CUI.Form
+			fields: if placeholdersValues then getPlaceholdersFields(templates[templateData.template]) else []
+			hidden: if placeholdersValues then false else true
+			data: placeholdersValues
+			onDataChanged: (data, field) =>
+				mainForm = field.getForm().getForm()
+				mainData = mainForm.getData()
+				template = templates[templateData.template]
+				url = template.url
+				newDisplayname = {}
+
+				for name, value of data
+					if value
+						url = replacePlaceholder(url, name, value)
+
+					for language, displayname of template.displayname
+						if value
+							newDisplayname[language] = replacePlaceholder(newDisplayname[language] or displayname, name, value)
+						else
+							newDisplayname[language] = newDisplayname[language] or displayname
+
+				fillDisplayName(mainData, newDisplayname)
+
+				mainData.url = url
+				mainForm.getFieldsByName("url")[0].reload()
+				mainForm.getFieldsByName("preview")[0].reload()
+				textFieldName = switch @getTitleType()
+					when "text-l10n"
+						"text"
+					when "text"
+						"text_plain"
+				mainForm.getFieldsByName(textFieldName)[0].reload()
+				return
+
+		templateSelectOptions = [
+			text: $$("custom.data.type.link.template.select")
+			value: null
+		]
+
+		for template, index in templates
+			templateSelectOptions.push(
+				text: ez5.loca.getBestFrontendValue(template.name)
+				value: index
+			)
+
+		selectField =
+			type: CUI.Select
+			name: "template"
+			options: templateSelectOptions
+			data: templateData
+			onDataChanged: (data, field) =>
+				form = field.getForm()
+				mainData = form.getData()
+				if CUI.util.isNull(data.template)
+					placeholdersFieldForm.fields = []
+					placeholdersFieldForm.hidden = true
+					form.reload()
+					return
+
+				template = templates[data.template]
+
+				fillDisplayName(mainData, template.displayname)
+
+				mainData.url = template.url
+
+				placeholdersFields = getPlaceholdersFields(template)
+				placeholdersFieldForm.fields = placeholdersFields
+				placeholdersFieldForm.data = {}
+				placeholdersFieldForm.hidden = placeholdersFields.length == 0
+
+				form.reload()
+				return
+
+		return [selectField, placeholdersFieldForm]
 
 	renderDetailOutput: (data, top_level_data, opts) ->
 		cdata = @initData(data)
