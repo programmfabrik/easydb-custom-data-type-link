@@ -29,6 +29,8 @@ custom.data.type.link.setting.schema.rendered_options.title.text,Einsprachiger T
 custom.data.type.link.setting.schema.rendered_options.title.text-l10n,Mehrsprachiger Titel,Multilingual title,,
 custom.data.type.link.edit.button|tooltip,Weblink hinzufügen.,Add weblink.,,
 custom.data.type.link.template.select,,- No template -,,
+custom.data.type.link.template.select.label,,Choose a template,,
+custom.data.type.link.edit.template.missing_placeholders,,All template fields are required.,,
 server.config.group.system.weblink.title,Weblink,Weblink,,
 server.config.group.system.weblink.introduction,,Configure templates to create weblinks faster,,
 server.config.name.system.weblink,,Configuration for weblinks,,

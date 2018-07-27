@@ -248,6 +248,12 @@ class CustomDataTypeLink extends CustomDataType
 			fields.push(templateSelectField[0]) # Template selector
 			fields.push(templateSelectField[1]) # Placeholder inputs
 
+		hideShow = (field) =>
+			if @__currentTemplate
+				field.hide()
+			else
+				field.show()
+
 		fields.push
 			type: CUI.Input
 			undo_and_changed_support: false
@@ -255,7 +261,9 @@ class CustomDataTypeLink extends CustomDataType
 				label: $$("custom.data.type.link.modal.form.url.label")
 			placeholder: $$("custom.data.type.link.modal.form.url.placeholder")
 			name: "url"
+			hidden: !!@__currentTemplate
 			checkInput: (url) => @__isValidUrl(url)
+			onDataInit: hideShow
 
 		switch @getTitleType()
 			when "text-l10n"
@@ -263,16 +271,20 @@ class CustomDataTypeLink extends CustomDataType
 					type: CUI.MultiInput
 					name: "text"
 					undo_and_changed_support: false
+					hidden: !!@__currentTemplate
 					form:
 						label: $$("custom.data.type.link.modal.form.text.label")
 					control: ez5.loca.getLanguageControl()
+					onDataInit: hideShow
 			when "text"
 				fields.push
 					type: CUI.Input
 					name: "text_plain"
 					undo_and_changed_support: false
+					hidden: !!@__currentTemplate
 					form:
 						label: $$("custom.data.type.link.modal.form.text.label")
+					onDataInit: hideShow
 
 		if @supportsTimestamp()
 			fields.push
@@ -284,76 +296,143 @@ class CustomDataTypeLink extends CustomDataType
 
 		fields
 
+	__replacePlaceholder: (string, name, value) ->
+		return string.replace(///%#{name}%///g, value)
+
+	# Replace all placeholders of the displayname with the current values.
+	__fillDisplayName: (data, template) ->
+		newDisplayname = {}
+
+		for name, value of @__placeholdersData
+			for language, displayname of template.displayname
+				if value
+					newDisplayname[language] = @__replacePlaceholder(newDisplayname[language] or displayname, name, value)
+				else
+					newDisplayname[language] = newDisplayname[language] or displayname
+
+		switch @getTitleType()
+			when "text-l10n"
+				for language, displayname of newDisplayname
+					data.text[language] = displayname
+			when "text"
+				data.text_plain = ez5.loca.getBestFrontendValue(newDisplayname)
+		return
+
+	# Replace all placeholders of the url with the current values.
+	__fillUrl: (data, template) ->
+		url = template.url
+
+		for name, value of @__placeholdersData
+			if value
+				url = @__replacePlaceholder(url, name, value)
+		data.url = url
+
+		return
+
+	# It gets the template and the values in the url for the placeholders.
+	__getTemplateAndPlaceholdersForUrl: (url) ->
+		if not url
+			return
+
+		templates = ez5.session.getBaseConfig().system.weblink?.templates
+		if not templates or templates.length == 0
+			return
+
+		for template, index in templates
+			urlRegExpValues = new RegExp(template.url.replace(/%[^%]+%/g, "(.*)"))
+			match = urlRegExpValues.exec(url)
+			if match?.length > 0
+				match.shift() # match[0] is the full url, so it is removed.
+				placeholdersRegexp = /%([^%]+)%/g
+				placeholdersValues = {}
+				for value in match
+					if value.startsWith("%") and value.endsWith("%")
+						continue
+
+					nextPlaceholderMatch = placeholdersRegexp.exec(template.url) # match[0] = %placeholder%, match[1] = placeholder
+					if nextPlaceholderMatch and nextPlaceholderMatch[1]
+						placeholdersValues[nextPlaceholderMatch[1]] = value
+				template._index = index
+				template._placeholdersValues = placeholdersValues
+				return template
+		return
+
 	__getTemplateSelectFields: (cdata) ->
 		templates = ez5.session.getBaseConfig().system.weblink?.templates
 		if not templates or templates.length == 0
 			return
 
-		templateData = {}
-
-		# If there is an existing URL, try to match with an existing template and substract the placeholders' values.
-		if cdata
-			url = cdata.url
-			for template, index in templates
-				urlRegExpValues = new RegExp(template.url.replace(/%[^%]+%/g, "(.*)"))
-				match = urlRegExpValues.exec(url)
-				if match?.length > 0
-					match.shift() # match[0] is the full url, so it is removed.
-					placeholdersRegexp = /%([^%]+)%/g
-					placeholdersValues = {}
-					for value in match
-						nextPlaceholderMatch = placeholdersRegexp.exec(template.url) # match[0] = %placeholder%, match[1] = placeholder
-						if nextPlaceholderMatch
-							placeholdersValues[nextPlaceholderMatch[1]] = value
-					templateData.template = index
-					break
-
+		# Get the fields of the placeholders for the template.
 		getPlaceholdersFields = (template) =>
 			placeholdersFields = []
 			for placeholder in template.placeholders
+				label = ez5.loca.getBestFrontendValue(placeholder.displayname)
 				placeholdersFields.push
 					type: CUI.Input
 					name: placeholder.key
-					form: label: ez5.loca.getBestFrontendValue(placeholder.displayname)
+					form: label: label or placeholder.key
 			return placeholdersFields
 
-		fillDisplayName = (data, templateDisplayname) =>
-			switch @getTitleType()
-				when "text-l10n"
-					for language, displayname of templateDisplayname
-						data.text[language] = displayname
-				when "text"
-					data.text_plain = ez5.loca.getBestFrontendValue(templateDisplayname)
+		# Load the new template by its index in the array, and reload the form.
+		loadTemplate = (form, templateIndex) =>
+			data = form.getData()
+			template = templates[templateIndex]
+			@__currentTemplate = template
+
+			templateFound = @__getTemplateAndPlaceholdersForUrl(data.url)
+			if templateFound
+				for key, value of template._placeholdersValues
+					@__placeholdersData[key] = value
+
+			@__fillUrl(data, template)
+			@__fillDisplayName(data, template)
+
+			# Update fields of the placeholders
+			placeholdersFields = getPlaceholdersFields(template)
+			placeholdersFieldForm.fields = placeholdersFields
+			placeholdersFieldForm.hidden = placeholdersFields.length == 0
+
+			placeholdersFieldForm.data = @__placeholdersData
+			form.reload()
 			return
 
-		replacePlaceholder = (string, name, value) =>
-			return string.replace(///%#{name}%///g, value)
+		@__placeholdersData = {}
+
+		# If there is an existing URL, try to match with an existing template and substract the placeholders' values.
+		if cdata
+			template = @__getTemplateAndPlaceholdersForUrl(cdata.url)
+			if template
+				@__currentTemplate = template
+				@__placeholdersData = template._placeholdersValues
+				cdata.template = template._index
+				@__fillUrl(cdata, template)
+				# The displayname is automatic filled if it is empty.
+				displayname = switch @getTitleType()
+					when "text-l10n"
+						cdata.text
+					when "text"
+						cdata.text_plain
+
+				if CUI.util.isEmpty(displayname)
+					@__fillDisplayName(cdata, template)
+
+		cdata.placeholders = @__placeholdersData
+
+		fields = if @__currentTemplate then getPlaceholdersFields(templates[cdata.template]) else []
 
 		placeholdersFieldForm =
 			type: CUI.Form
-			fields: if placeholdersValues then getPlaceholdersFields(templates[templateData.template]) else []
-			hidden: if placeholdersValues then false else true
-			data: placeholdersValues
+			name: "placeholders"
+			fields: fields
+			hidden: fields.length == 0
 			onDataChanged: (data, field) =>
 				mainForm = field.getForm().getForm()
 				mainData = mainForm.getData()
-				template = templates[templateData.template]
-				url = template.url
-				newDisplayname = {}
+				template = templates[mainData.template]
 
-				for name, value of data
-					if value
-						url = replacePlaceholder(url, name, value)
+				@__fillUrl(mainData, template)
+				@__fillDisplayName(mainData, template)
 
-					for language, displayname of template.displayname
-						if value
-							newDisplayname[language] = replacePlaceholder(newDisplayname[language] or displayname, name, value)
-						else
-							newDisplayname[language] = newDisplayname[language] or displayname
-
-				fillDisplayName(mainData, newDisplayname)
-
-				mainData.url = url
 				mainForm.getFieldsByName("url")[0].reload()
 				mainForm.getFieldsByName("preview")[0].reload()
 				textFieldName = switch @getTitleType()
@@ -369,44 +448,50 @@ class CustomDataTypeLink extends CustomDataType
 			value: null
 		]
 
-		for template, index in templates
+		for template, templateIndex in templates
 			templateSelectOptions.push(
 				text: ez5.loca.getBestFrontendValue(template.name)
-				value: index
+				value: templateIndex
 			)
 
 		selectField =
 			type: CUI.Select
 			name: "template"
 			options: templateSelectOptions
-			data: templateData
+			form: label: $$("custom.data.type.link.template.select.label")
 			onDataChanged: (data, field) =>
 				form = field.getForm()
-				mainData = form.getData()
 				if CUI.util.isNull(data.template)
+					@__currentTemplate = false
 					placeholdersFieldForm.fields = []
 					placeholdersFieldForm.hidden = true
 					form.reload()
-					return
-
-				template = templates[data.template]
-
-				fillDisplayName(mainData, template.displayname)
-
-				mainData.url = template.url
-
-				placeholdersFields = getPlaceholdersFields(template)
-				placeholdersFieldForm.fields = placeholdersFields
-				placeholdersFieldForm.data = {}
-				placeholdersFieldForm.hidden = placeholdersFields.length == 0
-
-				form.reload()
+				else
+					loadTemplate(form, data.template)
 				return
 
 		return [selectField, placeholdersFieldForm]
 
 	renderDetailOutput: (data, top_level_data, opts) ->
 		cdata = @initData(data)
+
+		if cdata
+			template = @__getTemplateAndPlaceholdersForUrl(cdata.url)
+			if template
+				@__placeholdersData = template._placeholdersValues
+				@__fillUrl(cdata, template)
+
+				# The displayname is automatic filled if it is empty.
+				displayname = switch @getTitleType()
+					when "text-l10n"
+						cdata.text
+					when "text"
+						cdata.text_plain
+
+				if CUI.util.isEmpty(displayname)
+					@__fillDisplayName(cdata, template)
+
+
 		@__renderButtonByData(cdata)
 
 	# returns "empty", "ok", "invalid"
@@ -418,26 +503,32 @@ class CustomDataTypeLink extends CustomDataType
 			if CUI.util.isEmpty(cdata.url?.trim())
 				return "empty"
 
+			# Check if all placeholders are filled.
+			if @__currentTemplate
+				placeholders = @__currentTemplate.placeholders
+				if placeholders.some((placeholder) => CUI.util.isEmpty(@__placeholdersData[placeholder.key]))
+					return "invalid"
+
 			if @__isValidUrl(cdata.url)
 				return "ok"
 
 			return "invalid"
 
-		# console.debug "checking...", cdata.url, status
 		return status
 
 	__isValidUrl: (url) ->
 		location = CUI.parseLocation(url)
 		return !!location and /.+\..{2,}$/.test(location.hostname)
 
-
 	__renderButtonByData: (cdata) ->
-
 		switch @getDataStatus(cdata)
 			when "empty"
 				return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.no_link"))
 			when "invalid"
-				return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.no_valid_link"), class: "ez-label-invalid")
+				if @__currentTemplate
+					return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.template.missing_placeholders"), class: "ez-label-invalid")
+				else
+					return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.no_valid_link"), class: "ez-label-invalid")
 
 		goto_url = CUI.parseLocation(cdata.url).url
 
@@ -461,7 +552,6 @@ class CustomDataTypeLink extends CustomDataType
 		.DOM
 
 	getLinkText: (cdata) ->
-		# console.debug "getLinkText", cdata, @getTitleType(), @getCustomSchemaSettings()
 		switch @getTitleType()
 			when "none"
 				txt = ""
@@ -480,8 +570,6 @@ class CustomDataTypeLink extends CustomDataType
 		info
 
 	getSaveData: (data, save_data, opts = {}) ->
-		# console.debug data, save_data, opts
-
 		if opts.demo_data
 			return {
 				url: "www.example.com"
@@ -532,10 +620,7 @@ class CustomDataTypeLink extends CustomDataType
 		else
 			delete(standard.l10ntext)
 
-		# console.debug "standard", standard, url
-
 		location = CUI.parseLocation(url)
-
 		hostnameParts = location.hostname.split(".")
 
 		return (

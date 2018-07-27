@@ -61,10 +61,10 @@ base_config:
           - name: placeholders
             type: table
             fields:
-              - name: displayname
-                type: text-l10n
               - name: key
                 type: text
+              - name: displayname
+                type: text-l10n
           - name: icon_url
             type: text
         position: 0
