@@ -329,13 +329,19 @@ class CustomDataTypeLink extends CustomDataType
 
 		return
 
+	__getTemplates: ->
+		templates = ez5.session.getBaseConfig().system.weblink?.templates
+		if not templates or templates.length == 0
+			return
+		return templates
+
 	# It gets the template and the values in the url for the placeholders.
 	__getTemplateAndPlaceholdersForUrl: (url) ->
 		if not url
 			return
 
-		templates = ez5.session.getBaseConfig().system.weblink?.templates
-		if not templates or templates.length == 0
+		templates = @__getTemplates()
+		if not templates
 			return
 
 		for template, index in templates
@@ -358,8 +364,8 @@ class CustomDataTypeLink extends CustomDataType
 		return
 
 	__getTemplateSelectFields: (cdata) ->
-		templates = ez5.session.getBaseConfig().system.weblink?.templates
-		if not templates or templates.length == 0
+		templates = @__getTemplates()
+		if not templates
 			return
 
 		# Get the fields of the placeholders for the template.
@@ -623,7 +629,7 @@ class CustomDataTypeLink extends CustomDataType
 		location = CUI.parseLocation(url)
 		hostnameParts = location.hostname.split(".")
 
-		return (
+		data = (
 			url: url
 			hostname: location.hostname
 			tld: hostnameParts[hostnameParts.length - 1]
@@ -636,6 +642,13 @@ class CustomDataTypeLink extends CustomDataType
 				string: url
 			_standard: standard
 		)
+
+		templateIndex = cdata.template
+		templates = @__getTemplates()
+		if templateIndex and templates?[templateIndex]
+			data.template = templates[templateIndex].name
+
+		return data
 
 	hasRenderForSort: ->
 		return true
