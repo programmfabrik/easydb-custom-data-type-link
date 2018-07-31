@@ -222,7 +222,7 @@ class CustomDataTypeLink extends CustomDataType
 	showEditPopover: (cdata, element, layout) ->
 		form = new CUI.Form
 			data: cdata
-			fields: @__getEditorFields()
+			fields: @__getEditorFields(cdata)
 			onDataChanged: =>
 				@__triggerFormChanged(form)
 		.start()
@@ -429,16 +429,8 @@ class CustomDataTypeLink extends CustomDataType
 				@__currentTemplate = templateFound.template
 				@__placeholdersData = templateFound.placeholdersValues
 				cdata.templateIndex = templateFound.index
-				@__fillUrl(cdata, templateFound.template)
-				# The displayname is automatic filled if it is empty.
-				displayname = switch @getTitleType()
-					when "text-l10n"
-						cdata.text
-					when "text"
-						cdata.text_plain
 
-				if CUI.util.isEmpty(displayname)
-					@__fillDisplayName(cdata, template)
+				@__fillData(cdata, templateFound.template)
 
 		cdata.placeholders = @__placeholdersData
 
@@ -458,7 +450,7 @@ class CustomDataTypeLink extends CustomDataType
 				@__fillDisplayName(mainData, template)
 
 				mainForm.getFieldsByName("url")[0].reload()
-				mainForm.getFieldsByName("preview")[0].reload()
+				mainForm.getFieldsByName("preview")[0]?.reload()
 				textFieldName = switch @getTitleType()
 					when "text-l10n"
 						"text"
@@ -496,6 +488,18 @@ class CustomDataTypeLink extends CustomDataType
 
 		return [selectField, placeholdersFieldForm]
 
+	__fillData: (cdata, template) ->
+		@__fillUrl(cdata, template)
+		# The displayname is automatic filled if it is empty.
+		switch @getTitleType()
+			when "text-l10n"
+				languages = ez5.session.getConfigFrontendLanguages()
+				if not languages.some((language) => not CUI.util.isEmpty(cdata.text[language]))
+					@__fillDisplayName(cdata, template)
+			when "text"
+				if CUI.util.isEmpty(cdata.text_plain)
+					@__fillDisplayName(cdata, template)
+
 	renderDetailOutput: (data, top_level_data, opts) ->
 		cdata = @initData(data)
 
@@ -503,17 +507,7 @@ class CustomDataTypeLink extends CustomDataType
 			templateFound = @__getTemplateAndPlaceholdersForUrl(cdata.url)
 			if templateFound?.template
 				@__placeholdersData = templateFound.placeholdersValues
-				@__fillUrl(cdata, templateFound.template)
-
-				# The displayname is automatic filled if it is empty.
-				displayname = switch @getTitleType()
-					when "text-l10n"
-						cdata.text
-					when "text"
-						cdata.text_plain
-
-				if CUI.util.isEmpty(displayname)
-					@__fillDisplayName(cdata, template)
+				@__fillData(cdata, templateFound.template)
 
 		@__renderButtonByData(cdata)
 
@@ -646,7 +640,7 @@ class CustomDataTypeLink extends CustomDataType
 		location = CUI.parseLocation(url)
 		hostnameParts = location.hostname.split(".")
 
-		data = (
+		return (
 			url: url
 			hostname: location.hostname
 			tld: hostnameParts[hostnameParts.length - 1]
@@ -659,15 +653,6 @@ class CustomDataTypeLink extends CustomDataType
 				string: url
 			_standard: standard
 		)
-
-		templateIndex = cdata.templateIndex
-		templates = @__getTemplates()
-		if templateIndex and templates?[templateIndex]
-			data.template = templates[templateIndex].name
-		else if cdata.template
-			data.template = cdata.template
-
-		return data
 
 	hasRenderForSort: ->
 		return true
