@@ -335,7 +335,28 @@ class CustomDataTypeLink extends CustomDataType
 			return
 		return templates
 
+	# It is necessary to escape all characters of the URL to create the regexp.
+	# https://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex
+	__escapeRegExp: (string) ->
+		if not string
+			return
+		return string.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")
+
+	#
 	# It gets the template and the values in the url for the placeholders.
+	#
+	# For example, if the template is
+	# https://%param1%.programmfabrik/%param2%?q=%param3%
+	# and the url is
+	# https://www.programmfabrik/demo?q=test
+	#
+	# then placeholdersValues is
+	# {
+	#  param1: "www",
+	#  param2: "demo",
+	#  param3: "test"
+	# }
+	#
 	__getTemplateAndPlaceholdersForUrl: (url) ->
 		if not url
 			return
@@ -345,7 +366,9 @@ class CustomDataTypeLink extends CustomDataType
 			return
 
 		for template, index in templates
-			urlRegExpValues = new RegExp(template.url.replace(/%[^%]+%/g, "(.*)"))
+			escapedStringRegExp = @__escapeRegExp(template.url)
+			escapedStringRegExp = escapedStringRegExp.replace(/%[^%]+%/g, "(.*)") # Replace %param% for (.*) to match values.
+			urlRegExpValues = new RegExp(escapedStringRegExp)
 			match = urlRegExpValues.exec(url)
 			if match?.length > 0
 				match.shift() # match[0] is the full url, so it is removed.
@@ -358,9 +381,11 @@ class CustomDataTypeLink extends CustomDataType
 					nextPlaceholderMatch = placeholdersRegexp.exec(template.url) # match[0] = %placeholder%, match[1] = placeholder
 					if nextPlaceholderMatch and nextPlaceholderMatch[1]
 						placeholdersValues[nextPlaceholderMatch[1]] = value
-				template._index = index
-				template._placeholdersValues = placeholdersValues
-				return template
+				return {
+					template: template
+					index: index
+					placeholdersValues: placeholdersValues
+				}
 		return
 
 	__getTemplateSelectFields: (cdata) ->
@@ -386,8 +411,8 @@ class CustomDataTypeLink extends CustomDataType
 			@__currentTemplate = template
 
 			templateFound = @__getTemplateAndPlaceholdersForUrl(data.url)
-			if templateFound
-				for key, value of template._placeholdersValues
+			if templateFound?.template
+				for key, value of templateFound.placeholdersValues
 					@__placeholdersData[key] = value
 
 			@__fillUrl(data, template)
@@ -406,12 +431,12 @@ class CustomDataTypeLink extends CustomDataType
 
 		# If there is an existing URL, try to match with an existing template and substract the placeholders' values.
 		if cdata
-			template = @__getTemplateAndPlaceholdersForUrl(cdata.url)
-			if template
-				@__currentTemplate = template
-				@__placeholdersData = template._placeholdersValues
-				cdata.template = template._index
-				@__fillUrl(cdata, template)
+			templateFound = @__getTemplateAndPlaceholdersForUrl(cdata.url)
+			if templateFound?.template
+				@__currentTemplate = templateFound.template
+				@__placeholdersData = templateFound.placeholdersValues
+				cdata.templateIndex = templateFound.index
+				@__fillUrl(cdata, templateFound.template)
 				# The displayname is automatic filled if it is empty.
 				displayname = switch @getTitleType()
 					when "text-l10n"
@@ -424,7 +449,7 @@ class CustomDataTypeLink extends CustomDataType
 
 		cdata.placeholders = @__placeholdersData
 
-		fields = if @__currentTemplate then getPlaceholdersFields(templates[cdata.template]) else []
+		fields = if @__currentTemplate then getPlaceholdersFields(templates[cdata.templateIndex]) else []
 
 		placeholdersFieldForm =
 			type: CUI.Form
@@ -434,7 +459,7 @@ class CustomDataTypeLink extends CustomDataType
 			onDataChanged: (data, field) =>
 				mainForm = field.getForm().getForm()
 				mainData = mainForm.getData()
-				template = templates[mainData.template]
+				template = templates[mainData.templateIndex]
 
 				@__fillUrl(mainData, template)
 				@__fillDisplayName(mainData, template)
@@ -462,18 +487,18 @@ class CustomDataTypeLink extends CustomDataType
 
 		selectField =
 			type: CUI.Select
-			name: "template"
+			name: "templateIndex"
 			options: templateSelectOptions
 			form: label: $$("custom.data.type.link.template.select.label")
 			onDataChanged: (data, field) =>
 				form = field.getForm()
-				if CUI.util.isNull(data.template)
+				if CUI.util.isNull(data.templateIndex)
 					@__currentTemplate = false
 					placeholdersFieldForm.fields = []
 					placeholdersFieldForm.hidden = true
 					form.reload()
 				else
-					loadTemplate(form, data.template)
+					loadTemplate(form, data.templateIndex)
 				return
 
 		return [selectField, placeholdersFieldForm]
@@ -482,10 +507,10 @@ class CustomDataTypeLink extends CustomDataType
 		cdata = @initData(data)
 
 		if cdata
-			template = @__getTemplateAndPlaceholdersForUrl(cdata.url)
-			if template
-				@__placeholdersData = template._placeholdersValues
-				@__fillUrl(cdata, template)
+			templateFound = @__getTemplateAndPlaceholdersForUrl(cdata.url)
+			if templateFound?.template
+				@__placeholdersData = templateFound.placeholdersValues
+				@__fillUrl(cdata, templateFound.template)
 
 				# The displayname is automatic filled if it is empty.
 				displayname = switch @getTitleType()
@@ -496,7 +521,6 @@ class CustomDataTypeLink extends CustomDataType
 
 				if CUI.util.isEmpty(displayname)
 					@__fillDisplayName(cdata, template)
-
 
 		@__renderButtonByData(cdata)
 
@@ -643,10 +667,12 @@ class CustomDataTypeLink extends CustomDataType
 			_standard: standard
 		)
 
-		templateIndex = cdata.template
+		templateIndex = cdata.templateIndex
 		templates = @__getTemplates()
 		if templateIndex and templates?[templateIndex]
 			data.template = templates[templateIndex].name
+		else if cdata.template
+			data.template = cdata.template
 
 		return data
 
