@@ -335,13 +335,6 @@ class CustomDataTypeLink extends CustomDataType
 			return
 		return templates
 
-	# It is necessary to escape all characters of the URL to create the regexp.
-	# https://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex
-	__escapeRegExp: (string) ->
-		if not string
-			return
-		return string.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")
-
 	#
 	# It gets the template and the values in the url for the placeholders.
 	#
@@ -366,7 +359,7 @@ class CustomDataTypeLink extends CustomDataType
 			return
 
 		for template, index in templates
-			escapedStringRegExp = @__escapeRegExp(template.url)
+			escapedStringRegExp = CUI.util.escapeRegExp(template.url)
 			escapedStringRegExp = escapedStringRegExp.replace(/%[^%]+%/g, "(.*)") # Replace %param% for (.*) to match values.
 			urlRegExpValues = new RegExp(escapedStringRegExp)
 			match = urlRegExpValues.exec(url)
