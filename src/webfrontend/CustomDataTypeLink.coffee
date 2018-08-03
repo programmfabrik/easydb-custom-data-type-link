@@ -249,10 +249,11 @@ class CustomDataTypeLink extends CustomDataType
 			fields.push(templateSelectField[1]) # Placeholder inputs
 
 		hideShow = (field) =>
-			if @__currentTemplate
-				field.hide()
-			else
+			data = field.getData()
+			if CUI.util.isNull(data.templateIndex)
 				field.show()
+			else
+				field.hide()
 
 		fields.push
 			type: CUI.Input
@@ -261,7 +262,7 @@ class CustomDataTypeLink extends CustomDataType
 				label: $$("custom.data.type.link.modal.form.url.label")
 			placeholder: $$("custom.data.type.link.modal.form.url.placeholder")
 			name: "url"
-			hidden: !!@__currentTemplate
+			hidden: not CUI.util.isNull(cdata.templateIndex)
 			checkInput: (url) => @__isValidUrl(url)
 			onDataInit: hideShow
 
@@ -271,7 +272,7 @@ class CustomDataTypeLink extends CustomDataType
 					type: CUI.MultiInput
 					name: "text"
 					undo_and_changed_support: false
-					hidden: !!@__currentTemplate
+					hidden: not CUI.util.isNull(cdata.templateIndex)
 					form:
 						label: $$("custom.data.type.link.modal.form.text.label")
 					control: ez5.loca.getLanguageControl()
@@ -281,7 +282,7 @@ class CustomDataTypeLink extends CustomDataType
 					type: CUI.Input
 					name: "text_plain"
 					undo_and_changed_support: false
-					hidden: !!@__currentTemplate
+					hidden: not CUI.util.isNull(cdata.templateIndex)
 					form:
 						label: $$("custom.data.type.link.modal.form.text.label")
 					onDataInit: hideShow
@@ -303,7 +304,7 @@ class CustomDataTypeLink extends CustomDataType
 	__fillDisplayName: (data, template) ->
 		newDisplayname = {}
 
-		for name, value of @__placeholdersData
+		for name, value of data.placeholders
 			for language, displayname of template.displayname
 				if value
 					newDisplayname[language] = @__replacePlaceholder(newDisplayname[language] or displayname, name, value)
@@ -322,7 +323,7 @@ class CustomDataTypeLink extends CustomDataType
 	__fillUrl: (data, template) ->
 		url = template.url
 
-		for name, value of @__placeholdersData
+		for name, value of data.placeholders
 			if value
 				url = @__replacePlaceholder(url, name, value)
 		data.url = url
@@ -401,12 +402,10 @@ class CustomDataTypeLink extends CustomDataType
 		loadTemplate = (form, templateIndex) =>
 			data = form.getData()
 			template = templates[templateIndex]
-			@__currentTemplate = template
-
 			templateFound = @__getTemplateAndPlaceholdersForUrl(data.url)
 			if templateFound?.template
 				for key, value of templateFound.placeholdersValues
-					@__placeholdersData[key] = value
+					placeholdersData[key] = value
 
 			@__fillUrl(data, template)
 			@__fillDisplayName(data, template)
@@ -415,26 +414,25 @@ class CustomDataTypeLink extends CustomDataType
 			placeholdersFields = getPlaceholdersFields(template)
 			placeholdersFieldForm.fields = placeholdersFields
 			placeholdersFieldForm.hidden = placeholdersFields.length == 0
+			placeholdersFieldForm.data = placeholdersData
 
-			placeholdersFieldForm.data = @__placeholdersData
 			form.reload()
 			return
 
-		@__placeholdersData = {}
+		placeholdersData = {}
 
 		# If there is an existing URL, try to match with an existing template and substract the placeholders' values.
 		if cdata
 			templateFound = @__getTemplateAndPlaceholdersForUrl(cdata.url)
 			if templateFound?.template
-				@__currentTemplate = templateFound.template
-				@__placeholdersData = templateFound.placeholdersValues
+				placeholdersData = templateFound.placeholdersValues
+				cdata.placeholders = placeholdersData
 				cdata.templateIndex = templateFound.index
 
 				@__fillData(cdata, templateFound.template)
+				placeholdersFields = getPlaceholdersFields(templateFound.template)
 
-		cdata.placeholders = @__placeholdersData
-
-		fields = if @__currentTemplate then getPlaceholdersFields(templates[cdata.templateIndex]) else []
+		fields = placeholdersFields or []
 
 		placeholdersFieldForm =
 			type: CUI.Form
@@ -478,7 +476,6 @@ class CustomDataTypeLink extends CustomDataType
 			onDataChanged: (data, field) =>
 				form = field.getForm()
 				if CUI.util.isNull(data.templateIndex)
-					@__currentTemplate = false
 					placeholdersFieldForm.fields = []
 					placeholdersFieldForm.hidden = true
 					form.reload()
@@ -506,7 +503,7 @@ class CustomDataTypeLink extends CustomDataType
 		if cdata
 			templateFound = @__getTemplateAndPlaceholdersForUrl(cdata.url)
 			if templateFound?.template
-				@__placeholdersData = templateFound.placeholdersValues
+				cdata.placeholders = templateFound.placeholdersValues
 				@__fillData(cdata, templateFound.template)
 
 		@__renderButtonByData(cdata)
@@ -521,9 +518,11 @@ class CustomDataTypeLink extends CustomDataType
 				return "empty"
 
 			# Check if all placeholders are filled.
-			if @__currentTemplate
-				placeholders = @__currentTemplate.placeholders
-				if placeholders.some((placeholder) => CUI.util.isEmpty(@__placeholdersData[placeholder.key]))
+			templates = @__getTemplates()
+			template = templates?[cdata.templateIndex]
+			if template and cdata.placeholders
+				placeholders = template.placeholders
+				if placeholders.some((placeholder) => CUI.util.isEmpty(cdata.placeholders[placeholder.key]))
 					return "invalid"
 
 			if @__isValidUrl(cdata.url)
@@ -542,10 +541,10 @@ class CustomDataTypeLink extends CustomDataType
 			when "empty"
 				return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.no_link"))
 			when "invalid"
-				if @__currentTemplate
-					return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.template.missing_placeholders"), class: "ez-label-invalid")
-				else
+				if CUI.util.isNull(cdata.templateIndex)
 					return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.no_valid_link"), class: "ez-label-invalid")
+				else
+					return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.template.missing_placeholders"), class: "ez-label-invalid")
 
 		goto_url = CUI.parseLocation(cdata.url).url
 
