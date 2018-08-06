@@ -317,6 +317,9 @@ class CustomDataTypeLink extends CustomDataType
 
 		switch titleType
 			when "text-l10n"
+				if not data.text
+					data.text = {}
+
 				for language, displayname of newDisplayname
 					data.text[language] = displayname
 			when "text"
@@ -497,6 +500,10 @@ class CustomDataTypeLink extends CustomDataType
 		# The displayname is automatic filled if it is empty.
 		switch @getTitleType()
 			when "text-l10n"
+				if CUI.util.isEmpty(cdata.text)
+					@__fillDisplayName(cdata, template)
+					return
+
 				languages = ez5.session.getConfigFrontendLanguages()
 				if not languages.some((language) => not CUI.util.isEmpty(cdata.text[language]))
 					@__fillDisplayName(cdata, template)
