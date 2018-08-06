@@ -302,6 +302,10 @@ class CustomDataTypeLink extends CustomDataType
 
 	# Replace all placeholders of the displayname with the current values.
 	__fillDisplayName: (data, template) ->
+		titleType = @getTitleType()
+		if titleType == "none"
+			return
+
 		newDisplayname = {}
 
 		for name, value of data.placeholders
@@ -311,7 +315,7 @@ class CustomDataTypeLink extends CustomDataType
 				else
 					newDisplayname[language] = newDisplayname[language] or displayname
 
-		switch @getTitleType()
+		switch titleType
 			when "text-l10n"
 				for language, displayname of newDisplayname
 					data.text[language] = displayname
@@ -445,16 +449,19 @@ class CustomDataTypeLink extends CustomDataType
 				template = templates[mainData.templateIndex]
 
 				@__fillUrl(mainData, template)
-				@__fillDisplayName(mainData, template)
 
-				mainForm.getFieldsByName("url")[0].reload()
-				mainForm.getFieldsByName("preview")[0]?.reload()
 				textFieldName = switch @getTitleType()
 					when "text-l10n"
 						"text"
 					when "text"
 						"text_plain"
-				mainForm.getFieldsByName(textFieldName)[0].reload()
+
+				if textFieldName # It is undefined for 'none' type.
+					@__fillDisplayName(mainData, template)
+					mainForm.getFieldsByName(textFieldName)[0].reload()
+
+				mainForm.getFieldsByName("url")[0].reload()
+				mainForm.getFieldsByName("preview")[0]?.reload()
 				return
 
 		templateSelectOptions = [
