@@ -55,7 +55,7 @@ base_config:
             type: text-l10n
           - name: url
             type: text
-            regexp: "^https?://[^/]+?$"
+            regex: "^https?://[^/]+?$"
           - name: displayname
             type: text-l10n
           - name: placeholders
