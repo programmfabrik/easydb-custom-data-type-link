@@ -53,16 +53,22 @@ base_config:
         fields:
           - name: name
             type: text-l10n
+            position: 0
           - name: url
             type: text
             regex: "^https?://[^/]+?([a-z0-9]|/.*)$"
+            position: 1
           - name: displayname
             type: text-l10n
+            position: 2
           - name: placeholders
             type: table
             fields:
               - name: key
                 type: text
+                position: 0
               - name: displayname
                 type: text-l10n
+                position: 1
+            position: 0
         position: 0
