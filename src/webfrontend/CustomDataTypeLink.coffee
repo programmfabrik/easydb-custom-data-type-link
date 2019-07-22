@@ -596,7 +596,7 @@ class CustomDataTypeLink extends CustomDataType
 			txt
 
 	getCheckInfo: (mode) ->
-		if mode == "detail"
+		if mode in ["detail", "text"]
 			return []
 
 		info = [ $$("custom.data.type.link.valid_url") ]
