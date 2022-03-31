@@ -338,7 +338,7 @@ class CustomDataTypeLink extends CustomDataType
 		return
 
 	__getTemplates: ->
-		baseConfig = ez5.session.getBaseConfig()
+		baseConfig = ez5.session.getBaseConfig("plugin", "custom-data-type-link")
 		baseConfig = baseConfig.system or baseConfig # TODO: Remove this after #64076 is merged.
 		templates = baseConfig.weblink?.templates
 		if not templates or templates.length == 0
