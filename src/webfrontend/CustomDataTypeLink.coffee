@@ -118,6 +118,9 @@ class CustomDataTypeLink extends CustomDataType
 	supportsStandard: ->
 		true
 
+	supportsPrinting: ->
+		true
+
 	supportsInline: ->
 		@getCustomMaskSettings().editor_style?.value != "popover"
 
