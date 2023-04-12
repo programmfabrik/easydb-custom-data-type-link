@@ -565,7 +565,6 @@ class CustomDataTypeLink extends CustomDataType
 				else
 					return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.template.missing_placeholders"), class: "ez-label-invalid")
 
-		debugger
 		urlLocation = CUI.parseLocation(cdata.url)
 		goto_url = urlLocation.href
 
