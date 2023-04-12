@@ -565,10 +565,9 @@ class CustomDataTypeLink extends CustomDataType
 				else
 					return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.template.missing_placeholders"), class: "ez-label-invalid")
 
+		debugger
 		urlLocation = CUI.parseLocation(cdata.url)
-		goto_url = urlLocation.url
-		if urlLocation.search
-			goto_url += urlLocation.search
+		goto_url = urlLocation.href
 
 		if cdata.datetime
 			tt_text = $$("custom.data.type.link.url.tooltip_with_datetime", url: goto_url, datetime: ez5.format_date_and_time(cdata.datetime))
