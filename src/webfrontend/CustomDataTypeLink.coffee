@@ -101,8 +101,8 @@ class CustomDataTypeLink extends CustomDataType
 			@fullName()+".url"
 			@fullName()+".text_plain"
 		]
-
-		for lang in ez5.session.getPref("search_languages")
+		searchLanguageKey = if ez5.version("6.5") then "database_languages" else "search_languages"
+		for lang in ez5.session.getPref(searchLanguageKey)
 			field_names.push(@fullName()+".text."+lang)
 
 		field_names
