@@ -3,8 +3,8 @@ plugin:
   version: 1.0
   url: https://github.com/programmfabrik/easydb-custom-data-type-link
   displayname:
-    de-DE: Weblink
-    en-US: Weblink
+    en-US: "Custom Data Type: Weblink"
+    de-DE: "Custom Data Type: Weblink"
   info:
     de-DE: Mit dem Weblink Plugin können Internet-Links verwaltet werden.
     en-US: Use the plugin to store internet links.
