@@ -60,6 +60,10 @@ class CustomDataTypeLink extends CustomDataType
 		if not cdata.url
 			cdata.url = ""
 
+		# We add the template data, if we have any.
+		if data._template?[@name()]
+			cdata._template = data._template[@name()]
+
 		cdata
 
 	renderFieldAsGroup: (data, top_level_data, opts) ->
@@ -257,13 +261,14 @@ class CustomDataTypeLink extends CustomDataType
 				field.show()
 			else
 				field.hide()
-
+		status = @getDataStatus(cdata)
+		fallback_url = cdata._template?.url or null # This shows the template value if it exists as placeholder.
 		fields.push
 			type: CUI.Input
 			undo_and_changed_support: false
 			form:
 				label: $$("custom.data.type.link.modal.form.url.label")
-			placeholder: $$("custom.data.type.link.modal.form.url.placeholder")
+			placeholder: fallback_url or $$("custom.data.type.link.modal.form.url.placeholder")
 			name: "url"
 			hidden: not CUI.util.isNull(cdata.templateIndex)
 			checkInput: (url) => @__isValidUrl(url)
@@ -271,19 +276,23 @@ class CustomDataTypeLink extends CustomDataType
 
 		switch @getTitleType()
 			when "text-l10n"
+				placeholder = cdata._template?.text or {}
 				fields.push
 					type: CUI.MultiInput
 					name: "text"
 					undo_and_changed_support: false
+					placeholder: placeholder
 					hidden: not CUI.util.isNull(cdata.templateIndex)
 					form:
 						label: $$("custom.data.type.link.modal.form.text.label")
 					control: ez5.loca.getLanguageControl()
 					onDataInit: hideShow
 			when "text"
+				placeholder = cdata._template?.text_plain or ""
 				fields.push
 					type: CUI.Input
 					name: "text_plain"
+					placeholder: placeholder
 					undo_and_changed_support: false
 					hidden: not CUI.util.isNull(cdata.templateIndex)
 					form:
@@ -555,15 +564,18 @@ class CustomDataTypeLink extends CustomDataType
 		location = CUI.parseLocation(url)
 		return !!location and /.+\..{2,}$/.test(location.hostname)
 
-	__renderButtonByData: (cdata) ->
-		switch @getDataStatus(cdata)
-			when "empty"
-				return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.no_link"))
-			when "invalid"
-				if CUI.util.isNull(cdata.templateIndex)
-					return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.no_valid_link"), class: "ez-label-invalid")
-				else
-					return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.template.missing_placeholders"), class: "ez-label-invalid")
+	__renderButtonByData: (cdata, template=false) ->
+		if not template
+			switch @getDataStatus(cdata)
+				when "empty"
+					if cdata._template
+						return @__renderButtonByData(cdata._template, true)
+					return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.no_link"))
+				when "invalid"
+					if CUI.util.isNull(cdata.templateIndex)
+						return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.no_valid_link"), class: "ez-label-invalid")
+					else
+						return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.template.missing_placeholders"), class: "ez-label-invalid")
 
 		urlLocation = CUI.parseLocation(cdata.url)
 		goto_url = urlLocation.href
@@ -617,7 +629,8 @@ class CustomDataTypeLink extends CustomDataType
 					value: ""
 			}
 
-		cdata = data[@name()] or data._template?[@name()]
+		template_data = data._template?[@name()]
+		cdata = data[@name()]
 
 		switch @getDataStatus(cdata)
 			when "invalid"
@@ -626,7 +639,10 @@ class CustomDataTypeLink extends CustomDataType
 				else
 					throw new InvalidSaveDataException()
 			when "empty"
-				save_data[@name()] = null
+				if template_data and @getDataStatus(template_data) == "ok"
+					save_data[@name()] = template_data
+				else
+					save_data[@name()] = null
 			when "ok"
 				save_data[@name()] = @__buildData(cdata)
 
