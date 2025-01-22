@@ -568,7 +568,7 @@ class CustomDataTypeLink extends CustomDataType
 		if not template
 			switch @getDataStatus(cdata)
 				when "empty"
-					if cdata._template
+					if cdata._template and not CUI.util.isEmpty(cdata._template.url)
 						return @__renderButtonByData(cdata._template, true)
 					return new CUI.EmptyLabel(text: $$("custom.data.type.link.edit.no_link"))
 				when "invalid"
