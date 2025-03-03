@@ -620,6 +620,14 @@ class CustomDataTypeLink extends CustomDataType
 		info = [ $$("custom.data.type.link.valid_url") ]
 		info
 
+	checkValue:  (data, top_level_data, opts) ->
+		cdata = data[@name()]
+		switch @getDataStatus(cdata)
+			when "invalid"
+				return $$("custom.data.type.link.invalid_url") # The URL provided does not have a valid format.
+		return true
+
+
 	getSaveData: (data, save_data, opts = {}) ->
 		if opts.demo_data
 			return {
@@ -634,10 +642,7 @@ class CustomDataTypeLink extends CustomDataType
 
 		switch @getDataStatus(cdata)
 			when "invalid"
-				if opts.copy
-					save_data[@name()] = null
-				else
-					throw new InvalidSaveDataException()
+				save_data[@name()] = @__buildData(cdata)
 			when "empty"
 				if template_data and @getDataStatus(template_data) == "ok"
 					save_data[@name()] = template_data

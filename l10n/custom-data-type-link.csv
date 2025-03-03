@@ -46,3 +46,4 @@ server.config.parameter.system.weblink.templates.placeholders.displayname.label,
 server.config.parameter.system.weblink.templates.placeholders.key.label,Key,FALSE,Key,FALSE,Key,FALSE,Avain,FALSE,Nyckel,FALSE,Clé,FALSE,,FALSE,,FALSE
 server.config.parameter.system.weblink.templates.placeholders.label,Variablen,FALSE,Variables,FALSE,Variables,FALSE,Muuttujat,FALSE,Variabler,FALSE,Variables,FALSE,,FALSE,,FALSE
 server.config.parameter.system.weblink.templates.url.label,URL,FALSE,URL,FALSE,URL,FALSE,URL,FALSE,URL,FALSE,URL,FALSE,,FALSE,,FALSE
+custom.data.type.link.invalid_url,Die angegebene URL hat kein gültiges Format.,TRUE,The URL provided does not have a valid format.,FALSE,,FALSE,,FALSE,,FALSE,,FALSE,,FALSE,,FALSE
