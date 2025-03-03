@@ -105,9 +105,11 @@ class CustomDataTypeLink extends CustomDataType
 			@fullName()+".url"
 			@fullName()+".text_plain"
 		]
-		searchLanguageKey = if ez5.version("6.5") then "database_languages" else "search_languages"
-		for lang in ez5.session.getPref(searchLanguageKey)
-			field_names.push(@fullName()+".text."+lang)
+		if not ez5.version("6")
+			for lang in ez5.session.getPref("search_languages")
+				field_names.push(@fullName()+".text."+lang)
+		else
+			field_names.push(@fullName()+".text")
 
 		field_names
 
@@ -681,12 +683,13 @@ class CustomDataTypeLink extends CustomDataType
 			delete(standard.l10ntext)
 
 		location = CUI.parseLocation(url)
-		hostnameParts = location.hostname.split(".")
-
+		hostnameParts = location?.hostname?.split(".")
+		if hostnameParts
+			tld = hostnameParts[hostnameParts.length - 1]
 		return (
 			url: url
-			hostname: location.hostname
-			tld: hostnameParts[hostnameParts.length - 1]
+			hostname: location?.hostname
+			tld: tld or ""
 			text: text
 			text_plain: text_plain
 			datetime: cdata.datetime
