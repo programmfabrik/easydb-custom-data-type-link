@@ -15,6 +15,8 @@ class CustomDataTypeLink extends CustomDataType
 		# console.error "getQueryFieldBadge", data
 		if data["#{@name()}:unset"]
 			value = $$("text.column.badge.without")
+		else if data["#{@name()}:has_value"]
+			value = $$("field.search.badge.has_value")
 		else
 			value = data[@name()]
 
@@ -191,7 +193,6 @@ class CustomDataTypeLink extends CustomDataType
 	# possible additions, which should be stored in key+":<additional>"
 
 	getSearchFilter: (data, key=@name()) ->
-
 		if data[key+":unset"]
 			filter =
 				type: "in"
@@ -200,6 +201,9 @@ class CustomDataTypeLink extends CustomDataType
 			filter._unnest = true
 			filter._unset_filter = true
 			return filter
+
+		else if data[key+":has_value"]
+			return @getHasValueFilter(data, key)
 
 		filter = super(data, key)
 		if filter
@@ -227,6 +231,18 @@ class CustomDataTypeLink extends CustomDataType
 					fields: @getFieldNamesForSearch()
 					in: [ str ]
 		filter
+
+	getHasValueFilter: (data, key=@name()) ->
+		if data[key+":has_value"]
+			filter =
+				type: "in"
+				fields: [ @fullName()+".url" ]
+				in: [ null ]
+				bool: "must_not"
+			filter._unnest = true
+			filter._has_value_filter = true
+			return filter
+
 
 	showEditPopover: (cdata, element, layout) ->
 		form = new CUI.Form
