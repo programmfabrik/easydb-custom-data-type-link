@@ -27,7 +27,6 @@ class CustomDataTypeLink extends CustomDataType
 		$$("custom.data.type.link.name")
 
 	isEmpty: (data, top_level_data, opts={}) ->
-
 		if opts.mode == "expert"
 			# check plain input in search
 			return CUI.util.isEmpty(data[@name()]?.trim())
@@ -643,6 +642,9 @@ class CustomDataTypeLink extends CustomDataType
 		switch @getDataStatus(cdata)
 			when "invalid"
 				return $$("custom.data.type.link.invalid_url") # The URL provided does not have a valid format.
+			when "empty"
+				if @isRequired(data, top_level_data, opts)
+					return $$("data.column.check.required", field: @fullNameLocalized())
 		return true
 
 
