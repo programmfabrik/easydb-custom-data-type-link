@@ -33,6 +33,7 @@ custom_types:
             type:
               type: select
               options: ["none", "text", "text-l10n"]
+              default: "text-l10n"
         - name: add_timestamp
           parameters:
             value:

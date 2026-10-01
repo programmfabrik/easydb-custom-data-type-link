@@ -40,8 +40,7 @@ class CustomDataTypeLink extends CustomDataType
 		tags = []
 		pre = "custom.data.type.link.setting.schema.rendered_options."
 
-		if custom_settings.title?.type
-			tags.push(pre+"title."+custom_settings.title.type)
+		tags.push(pre+"title."+(custom_settings.title?.type or "text-l10n"))
 
 		if custom_settings.add_timestamp?.value
 			tags.push(pre+"with_date")
